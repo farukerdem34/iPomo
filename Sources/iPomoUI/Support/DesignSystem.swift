@@ -93,6 +93,13 @@ enum StagePalette {
     }
 }
 
+enum Motion {
+    /// Calm, quick UI motion; returns nil when Reduce Motion is enabled.
+    static func calm(_ reduceMotion: Bool, duration: Double = 0.2) -> Animation? {
+        reduceMotion ? nil : .smooth(duration: duration)
+    }
+}
+
 // MARK: - Typography
 
 enum Typography {
@@ -243,6 +250,7 @@ struct LedgerMetric: Identifiable {
 
 struct MetricLedger: View {
     let metrics: [LedgerMetric]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
@@ -252,6 +260,7 @@ struct MetricLedger: View {
                         .font(Typography.number(28))
                         .monospacedDigit()
                         .foregroundStyle(DesignTokens.ink)
+                        .contentTransition(.numericText())
                     Overline(metric.label)
                     if !metric.detail.isEmpty {
                         Text(metric.detail)
@@ -260,6 +269,7 @@ struct MetricLedger: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .animation(Motion.calm(reduceMotion, duration: 0.3), value: metric.value)
 
                 if index < metrics.count - 1 {
                     Rectangle()
@@ -325,22 +335,26 @@ struct EditorialEmptyState: View {
 struct EditorialCheckbox: View {
     let isOn: Bool
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
-            if isOn {
-                Circle().fill(accent)
-                Image(systemName: "checkmark")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundStyle(DesignTokens.onAccent)
-            } else {
-                Circle()
-                    .strokeBorder(DesignTokens.inkTertiary.opacity(0.55), lineWidth: 1.5)
-            }
+            Circle()
+                .fill(accent)
+                .opacity(isOn ? 1 : 0)
+            Circle()
+                .strokeBorder(DesignTokens.inkTertiary.opacity(0.55), lineWidth: 1.5)
+                .opacity(isOn ? 0 : 1)
+            Image(systemName: "checkmark")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundStyle(DesignTokens.onAccent)
+                .scaleEffect(isOn ? 1 : 0.5)
+                .opacity(isOn ? 1 : 0)
         }
         .frame(width: 20, height: 20)
         .frame(width: 40, height: 40)
         .contentShape(Rectangle())
+        .animation(Motion.calm(reduceMotion, duration: 0.15), value: isOn)
     }
 }
 
@@ -351,6 +365,8 @@ struct EditorialTabs<Item: Hashable & Identifiable>: View {
     var spacing: CGFloat = DesignTokens.s4
 
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Namespace private var underline
 
     var body: some View {
         HStack(alignment: .bottom, spacing: spacing) {
@@ -363,9 +379,12 @@ struct EditorialTabs<Item: Hashable & Identifiable>: View {
                         .foregroundStyle(selection == item ? DesignTokens.ink : DesignTokens.inkSecondary)
                         .padding(.bottom, 8)
                         .overlay(alignment: .bottom) {
-                            Rectangle()
-                                .fill(selection == item ? accent : .clear)
-                                .frame(height: 2)
+                            if selection == item {
+                                Rectangle()
+                                    .fill(accent)
+                                    .frame(height: 2)
+                                    .matchedGeometryEffect(id: "underline", in: underline)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .contentShape(Rectangle())
@@ -374,6 +393,7 @@ struct EditorialTabs<Item: Hashable & Identifiable>: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .animation(Motion.calm(reduceMotion), value: selection)
     }
 }
 

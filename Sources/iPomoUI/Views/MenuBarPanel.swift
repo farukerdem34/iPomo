@@ -6,6 +6,7 @@ struct MenuBarPanel: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.openWindow) private var openWindow
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var stageColor: Color {
         StagePalette.color(for: model.stage, accent: accent)
@@ -32,6 +33,7 @@ struct MenuBarPanel: View {
                     fill: stageColor,
                     height: 3
                 ))
+                .animation(reduceMotion ? nil : .linear(duration: 0.4), value: model.timerProgress.fraction)
 
             HStack(spacing: 6) {
                 Image(systemName: "scope")
@@ -47,11 +49,14 @@ struct MenuBarPanel: View {
                 Button {
                     model.toggleTimer()
                 } label: {
-                    Label(
-                        model.isTimerRunning ? "Pause" : "Start",
-                        systemImage: model.isTimerRunning ? "pause.fill" : "play.fill"
-                    )
+                    HStack(spacing: 6) {
+                        Image(systemName: model.isTimerRunning ? "pause.fill" : "play.fill")
+                            .contentTransition(.symbolEffect(.replace))
+                            .symbolEffectsRemoved(reduceMotion)
+                        Text(model.isTimerRunning ? "Pause" : "Start")
+                    }
                     .frame(maxWidth: .infinity)
+                    .animation(Motion.calm(reduceMotion), value: model.isTimerRunning)
                 }
                 .buttonStyle(EditorialFilledButtonStyle(
                     background: stageColor,

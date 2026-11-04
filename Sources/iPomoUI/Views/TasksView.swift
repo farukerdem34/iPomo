@@ -301,6 +301,7 @@ private struct TaskSectionView: View {
 private struct TaskLedgerRow: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let task: PlanTask
     @State private var hovering = false
     @State private var showDeleteConfirm = false
@@ -321,6 +322,7 @@ private struct TaskLedgerRow: View {
                         .strikethrough(task.isCompleted)
                         .foregroundStyle(task.isCompleted ? DesignTokens.inkTertiary : DesignTokens.ink)
                         .lineLimit(2)
+                        .animation(Motion.calm(reduceMotion), value: task.isCompleted)
                     if task.priority == .high {
                         Image(systemName: "exclamationmark")
                             .font(.system(size: 9, weight: .bold))
@@ -413,6 +415,7 @@ private struct TaskLedgerRow: View {
         }
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
+        .animation(Motion.calm(reduceMotion, duration: 0.12), value: hovering)
         .contextMenu {
             Button("Edit…") { model.presentEditTask(task) }
             Button("Focus on this task") {

@@ -103,6 +103,10 @@ Use `.system(design: .serif)` rather than bundling fonts. No Inter/Roboto.
 
 - Subtle only: countdown numeric transition, 0.2s list changes, 0.25s ring progress,
   0.15s switch state.
+- Calm presets from `Motion` in DesignSystem (`Motion.calm`): 0.15s sidebar selection
+  and checkbox state, 0.2s tab underline slide and play/pause symbol replace, 0.3s
+  stage-color crossfade and metric counts, smooth progress bars. All disabled under
+  Reduce Motion.
 - No bouncing cards, no decorative confetti, no parallax.
 
 ## Anti-slop checklist

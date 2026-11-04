@@ -4,6 +4,7 @@ import SwiftUI
 struct TimerView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var stageColor: Color {
         StagePalette.color(for: model.stage, accent: accent)
@@ -61,11 +62,14 @@ struct TimerView: View {
                 Button {
                     model.toggleTimer()
                 } label: {
-                    Label(
-                        model.isTimerRunning ? "Pause" : "Start",
-                        systemImage: model.isTimerRunning ? "pause.fill" : "play.fill"
-                    )
+                    HStack(spacing: 6) {
+                        Image(systemName: model.isTimerRunning ? "pause.fill" : "play.fill")
+                            .contentTransition(.symbolEffect(.replace))
+                            .symbolEffectsRemoved(reduceMotion)
+                        Text(model.isTimerRunning ? "Pause" : "Start")
+                    }
                     .frame(minWidth: 92)
+                    .animation(Motion.calm(reduceMotion), value: model.isTimerRunning)
                 }
                 .buttonStyle(EditorialFilledButtonStyle(
                     background: stageColor,
@@ -114,6 +118,7 @@ struct TimerView: View {
             }
         }
         .frame(maxWidth: .infinity)
+        .animation(Motion.calm(reduceMotion, duration: 0.3), value: model.stage)
     }
 
     private var activeTaskMenu: some View {
@@ -191,7 +196,7 @@ struct TimerView: View {
                 )
                 .frame(width: size, height: size)
                 .rotationEffect(.degrees(-90))
-                .animation(.easeInOut(duration: 0.25), value: fraction)
+                .animation(Motion.calm(reduceMotion, duration: 0.25), value: fraction)
 
             VStack(spacing: DesignTokens.s1) {
                 Overline(model.stage.title, color: stageColor)

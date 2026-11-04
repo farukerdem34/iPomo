@@ -90,6 +90,7 @@ struct RootView: View {
 struct SidebarView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let planItems: [SidebarItem] = [.today, .timer, .tasks, .projects, .reports]
 
@@ -160,6 +161,7 @@ struct SidebarView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .animation(Motion.calm(reduceMotion, duration: 0.15), value: isSelected)
     }
 
     private func shortcut(for item: SidebarItem) -> String {
