@@ -403,8 +403,24 @@ struct EditorialProgressViewStyle: ProgressViewStyle {
     var height: CGFloat = 3
 
     func makeBody(configuration: Configuration) -> some View {
-        let fraction = min(1, max(0, configuration.fractionCompleted ?? 0))
-        return GeometryReader { proxy in
+        EditorialProgressBar(
+            fraction: min(1, max(0, configuration.fractionCompleted ?? 0)),
+            track: track,
+            fill: fill,
+            height: height
+        )
+    }
+}
+
+private struct EditorialProgressBar: View {
+    let fraction: Double
+    let track: Color
+    let fill: Color
+    let height: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        GeometryReader { proxy in
             ZStack(alignment: .leading) {
                 Capsule(style: .continuous)
                     .fill(track)
@@ -412,6 +428,7 @@ struct EditorialProgressViewStyle: ProgressViewStyle {
                     .fill(fill)
                     .frame(width: proxy.size.width * fraction)
             }
+            .animation(Motion.calm(reduceMotion, duration: 0.4), value: fraction)
         }
         .frame(height: height)
     }

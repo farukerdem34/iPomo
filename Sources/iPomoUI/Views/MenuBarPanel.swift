@@ -34,7 +34,6 @@ struct MenuBarPanel: View {
                     fill: stageColor,
                     height: 3
                 ))
-                .animation(reduceMotion ? nil : .linear(duration: 0.4), value: model.timerProgress.fraction)
 
             HStack(spacing: 6) {
                 Image(systemName: "scope")
