@@ -4,6 +4,7 @@ import SwiftUI
 struct TasksView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var searchFocused: Bool
 
     private var filteredTasks: [PlanTask] {
@@ -171,7 +172,11 @@ struct TasksView: View {
             )
             Spacer()
             Menu {
-                Button("Delete completed", role: .destructive) { model.deleteCompletedTasks() }
+                Button("Delete completed", role: .destructive) {
+                    withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                        model.deleteCompletedTasks()
+                    }
+                }
             } label: {
                 Label("Clean up", systemImage: "ellipsis.circle")
             }
@@ -261,6 +266,10 @@ struct TasksView: View {
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .environment(\.defaultMinListRowHeight, 44)
+        .animation(
+            Motion.calm(reduceMotion, duration: 0.2),
+            value: sections(tasks).flatMap { $0.tasks.map(\.id) }
+        )
     }
 }
 
@@ -317,7 +326,9 @@ private struct TaskLedgerRow: View {
     var body: some View {
         HStack(alignment: .center, spacing: DesignTokens.s2) {
             Button {
-                model.toggleTaskCompletion(id: task.id)
+                withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                    model.toggleTaskCompletion(id: task.id)
+                }
             } label: {
                 EditorialCheckbox(isOn: task.isCompleted)
             }
@@ -435,13 +446,19 @@ private struct TaskLedgerRow: View {
                 model.setFocusToday(id: task.id, value: !task.isFocusToday)
             }
             Button(task.isCompleted ? "Mark as Active" : "Mark as Completed") {
-                model.toggleTaskCompletion(id: task.id)
+                withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                    model.toggleTaskCompletion(id: task.id)
+                }
             }
             Divider()
             Button("Delete Task", role: .destructive) { showDeleteConfirm = true }
         }
         .alert("Delete “\(task.title)”?", isPresented: $showDeleteConfirm) {
-            Button("Delete", role: .destructive) { model.deleteTask(id: task.id) }
+            Button("Delete", role: .destructive) {
+                withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                    model.deleteTask(id: task.id)
+                }
+            }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("The task will be removed. Focus history is kept.")

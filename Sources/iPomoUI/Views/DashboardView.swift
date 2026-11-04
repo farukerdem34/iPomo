@@ -120,7 +120,7 @@ struct DashboardView: View {
                         )
                     }
                 }
-                .animation(.easeInOut(duration: 0.2), value: model.todayPlanTasks.map(\.id))
+                .animation(Motion.calm(reduceMotion, duration: 0.2), value: model.todayPlanTasks.map(\.id))
                 quickAddRow
             }
         }
@@ -296,6 +296,7 @@ struct DashboardView: View {
 private struct DashboardTaskRow: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let task: PlanTask
     let projectedStart: Date
     let isLast: Bool
@@ -325,7 +326,9 @@ private struct DashboardTaskRow: View {
 
             HStack(alignment: .top, spacing: DesignTokens.s2) {
                 Button {
-                    model.toggleTaskCompletion(id: task.id)
+                    withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                        model.toggleTaskCompletion(id: task.id)
+                    }
                 } label: {
                     EditorialCheckbox(isOn: task.isCompleted)
                 }
@@ -372,7 +375,9 @@ private struct DashboardTaskRow: View {
                     .padding(.top, 3)
 
                 Button {
-                    model.setFocusToday(id: task.id, value: !task.isFocusToday)
+                    withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                        model.setFocusToday(id: task.id, value: !task.isFocusToday)
+                    }
                 } label: {
                     Image(systemName: task.isFocusToday ? "star.fill" : "star")
                         .font(.system(size: 11, weight: .medium))
