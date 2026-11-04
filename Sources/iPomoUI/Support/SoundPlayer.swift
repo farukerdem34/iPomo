@@ -56,11 +56,6 @@ final class SoundPlayer {
         tickingTimer = nil
     }
 
-    func restartTickingIfNeeded(settings: SoundSettings) {
-        guard tickingTimer != nil else { return }
-        startTicking(settings: settings)
-    }
-
     func stopAll() {
         stopAlarm()
         stopTicking()

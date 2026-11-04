@@ -269,13 +269,16 @@ final class AppModel: ObservableObject {
     // MARK: Settings
 
     func updateSettings(_ mutation: (inout AppSettings) -> Void) {
+        let previousSound = database.settings.sound
         mutate { database in
             mutation(&database.settings)
             database.settings.timer.clamp()
             database.settings.sound.clamp()
         }
-        if database.timer.isRunning, database.timer.stage == .focus {
-            soundPlayer.restartTickingIfNeeded(settings: database.settings.sound)
+        if database.settings.sound != previousSound,
+           database.timer.isRunning,
+           database.timer.stage == .focus {
+            soundPlayer.startTicking(settings: database.settings.sound)
         }
         let notificationSettings = database.settings.notifications
         if notificationSettings.notificationsEnabled {
