@@ -573,6 +573,7 @@ final class AppModel: ObservableObject {
     func applyImportedDatabase() {
         guard var imported = pendingImportedDatabase else { return }
         imported.normalize()
+        store.backupIfNeeded(force: true)
         dataIsReadOnly = false
         dataReadOnlyMessage = nil
         database = imported
@@ -586,6 +587,7 @@ final class AppModel: ObservableObject {
     }
 
     func resetAllData() {
+        store.backupIfNeeded(force: true)
         dataIsReadOnly = false
         dataReadOnlyMessage = nil
         let fresh = AppDatabase()
