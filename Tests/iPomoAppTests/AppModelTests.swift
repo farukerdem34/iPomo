@@ -204,4 +204,33 @@ struct AppModelTests {
         #expect(model.database.projects.isEmpty)
         #expect(model.database.tasks.isEmpty)
     }
+
+    @Test func restoringOverdueRunningTimerFinishesItOnce() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("iPomoRestoreTests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = DatabaseStore(directoryURL: directory)
+        let task = PlanTask(title: "Restored", estimatedPomodoros: 1)
+        var database = AppDatabase(tasks: [task])
+        database.timer = TimerSnapshot(
+            stage: .focus,
+            isRunning: true,
+            startedAt: Date().addingTimeInterval(-3_600),
+            focusRoundCount: 0,
+            activeTaskID: task.id
+        )
+        try store.save(database)
+
+        let model = AppModel(store: store)
+
+        #expect(model.database.sessions.count == 1)
+        #expect(model.database.sessions.first?.stage == .focus)
+        #expect(model.database.sessions.first?.completed == true)
+        #expect(model.database.sessions.first?.actualSeconds == 1_500)
+        #expect(model.database.tasks.first?.completedPomodoros == 1)
+        #expect(model.database.timer.focusRoundCount == 1)
+        #expect(model.database.timer.stage == .shortBreak)
+        #expect(model.database.timer.isRunning == false)
+    }
 }
