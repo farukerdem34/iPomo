@@ -211,16 +211,20 @@ struct SettingsView: View {
         SettingsGroup(title: "Notifications") {
             EditorialToggleRow(title: "Enable notifications", isOn: model.binding(\.notifications.notificationsEnabled))
             EditorialToggleRow(title: "Notify when a round ends", isOn: model.binding(\.notifications.notifyOnRoundEnd))
+                .disabled(!model.database.settings.notifications.notificationsEnabled)
             EditorialToggleRow(title: "In-round reminders", isOn: model.binding(\.notifications.remindersEnabled))
+                .disabled(!model.database.settings.notifications.notificationsEnabled)
             SettingsFieldRow(title: "Reminder mode") {
                 picker(model.binding(\.notifications.reminderMode), options: ReminderMode.allCases, title: { $0.title }, width: 100)
             }
-            .disabled(!model.database.settings.notifications.remindersEnabled)
+            .disabled(!model.database.settings.notifications.notificationsEnabled
+                || !model.database.settings.notifications.remindersEnabled)
             SettingsFieldRow(title: "Reminder minutes") {
                 stepperValue(model.binding(\.notifications.reminderMinutes), range: 1...120, width: 30, label: "Reminder minutes")
                 unitLabel("min")
             }
-            .disabled(!model.database.settings.notifications.remindersEnabled)
+            .disabled(!model.database.settings.notifications.notificationsEnabled
+                || !model.database.settings.notifications.remindersEnabled)
             HStack(spacing: DesignTokens.s2) {
                 Text(model.notifications.authorized ? "Permission granted" : "Permission not granted")
                     .font(Typography.caption(11))

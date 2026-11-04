@@ -270,7 +270,8 @@ extension AppModel {
         let bannerText = completionMessage(to: next, task: task)
         showBanner(bannerText, kind: .success)
         if allowAlarm {
-            if database.settings.notifications.notifyOnRoundEnd {
+            let notificationSettings = database.settings.notifications
+            if notificationSettings.notificationsEnabled, notificationSettings.notifyOnRoundEnd {
                 notifications.notify(title: "iPomo", body: bannerText)
             }
             soundPlayer.playAlarm(settings: database.settings.sound)

@@ -259,8 +259,12 @@ final class AppModel: ObservableObject {
         if database.timer.isRunning, database.timer.stage == .focus {
             soundPlayer.restartTickingIfNeeded(settings: database.settings.sound)
         }
-        if database.settings.notifications.notificationsEnabled {
+        let notificationSettings = database.settings.notifications
+        if notificationSettings.notificationsEnabled {
             notifications.requestAuthorization()
+        }
+        if !notificationSettings.notificationsEnabled || !notificationSettings.remindersEnabled {
+            notifications.removeReminders()
         }
     }
 
