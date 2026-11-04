@@ -294,6 +294,13 @@ struct SettingsView: View {
                     .foregroundStyle(DesignTokens.inkSecondary)
                     .textSelection(.enabled)
                     .lineLimit(2)
+                if let readOnlyMessage = model.dataReadOnlyMessage {
+                    Text(readOnlyMessage)
+                        .font(Typography.caption(10))
+                        .foregroundStyle(DesignTokens.warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 4)
+                }
             }
             .padding(.vertical, 6)
             SettingsActionRow {

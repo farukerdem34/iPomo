@@ -151,6 +151,24 @@ import Testing
         }
     }
 
+    @Test func newerSchemaFileIsKeptInPlace() throws {
+        let directory = try makeDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = DatabaseStore(directoryURL: directory)
+        try Data(#"{"schemaVersion": 99}"#.utf8).write(to: store.fileURL)
+
+        let outcome = store.load()
+
+        guard case .unsupported(let version) = outcome else {
+            Issue.record("Expected unsupported outcome")
+            return
+        }
+        #expect(version == 99)
+        #expect(FileManager.default.fileExists(atPath: store.fileURL.path))
+        let backups = (try? FileManager.default.contentsOfDirectory(atPath: store.backupsURL.path)) ?? []
+        #expect(!backups.contains { $0.hasPrefix("corrupt-") })
+    }
+
     @Test func backupIsCreated() throws {
         let directory = try makeDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }

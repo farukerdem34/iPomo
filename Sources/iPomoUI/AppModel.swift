@@ -97,6 +97,8 @@ final class AppModel: ObservableObject {
     var autoStartWorkItem: DispatchWorkItem?
     private var terminateObserver: NSObjectProtocol?
     private var keyMonitor: Any?
+    private var dataIsReadOnly = false
+    private(set) var dataReadOnlyMessage: String?
 
     // MARK: Init
 
@@ -105,6 +107,7 @@ final class AppModel: ObservableObject {
         let outcome = store.load()
         var initial = AppDatabase()
         var startupMessage: String?
+        var readOnlyMessage: String?
         switch outcome {
         case .loaded(let loaded):
             initial = loaded
@@ -113,12 +116,21 @@ final class AppModel: ObservableObject {
         case .recovered(let recovered, let message):
             initial = recovered
             startupMessage = message
+        case .unsupported(let version):
+            readOnlyMessage = "This data file uses format version \(version), which this version of iPomo cannot read. Update iPomo. Changes made now are not saved; import or reset from Settings to replace the file."
+        case .unreadable(let message):
+            readOnlyMessage = "The data file could not be read: \(message). Changes made now are not saved; fix the file permissions or import a backup."
         }
         self.database = initial
         self.reportRange = initial.settings.reports.defaultRange
+        self.dataIsReadOnly = readOnlyMessage != nil
+        self.dataReadOnlyMessage = readOnlyMessage
 
         startTicker()
         restoreTimerIfNeeded()
+        if let readOnlyMessage {
+            startupMessage = readOnlyMessage
+        }
         if let startupMessage {
             showBanner(startupMessage, kind: .warning)
         }
@@ -224,6 +236,7 @@ final class AppModel: ObservableObject {
     func persistNow() {
         saveWorkItem?.cancel()
         saveWorkItem = nil
+        guard !dataIsReadOnly else { return }
         do {
             try store.save(database)
         } catch {
@@ -560,6 +573,8 @@ final class AppModel: ObservableObject {
     func applyImportedDatabase() {
         guard var imported = pendingImportedDatabase else { return }
         imported.normalize()
+        dataIsReadOnly = false
+        dataReadOnlyMessage = nil
         database = imported
         reportRange = imported.settings.reports.defaultRange
         reportProjectFilter = nil
@@ -571,6 +586,8 @@ final class AppModel: ObservableObject {
     }
 
     func resetAllData() {
+        dataIsReadOnly = false
+        dataReadOnlyMessage = nil
         let fresh = AppDatabase()
         database = fresh
         reportRange = fresh.settings.reports.defaultRange

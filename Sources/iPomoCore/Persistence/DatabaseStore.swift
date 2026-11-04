@@ -4,6 +4,8 @@ public enum DatabaseLoadOutcome: Sendable {
     case loaded(AppDatabase)
     case fresh(AppDatabase)
     case recovered(AppDatabase, String)
+    case unsupported(version: Int)
+    case unreadable(String)
 }
 
 public enum DatabaseStoreError: LocalizedError, Sendable {
@@ -50,11 +52,20 @@ public final class DatabaseStore {
         guard fileManager.fileExists(atPath: fileURL.path) else {
             return .fresh(AppDatabase())
         }
+        let data: Data
         do {
-            let data = try Data(contentsOf: fileURL)
+            data = try Data(contentsOf: fileURL)
+        } catch {
+            return .unreadable(error.localizedDescription)
+        }
+        do {
             let database = try decode(data)
             return .loaded(database)
         } catch {
+            if let storeError = error as? DatabaseStoreError,
+               case .unsupportedSchema(let version) = storeError {
+                return .unsupported(version: version)
+            }
             let corruptURL = moveCorruptFile()
             let detail = corruptURL.map { " A copy was kept at \($0.lastPathComponent)." } ?? ""
             return .recovered(

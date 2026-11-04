@@ -120,6 +120,7 @@ sleeping, and relaunching all use the same code path.
 - Atomic writes (`Data.write(options: .atomic)`).
 - **Backups:** before a save, if the latest backup is older than 24 h, copy the existing file to `Backups/data-<yyyyMMdd-HHmmss>.json`; keep seven.
 - **Corrupt recovery:** on decode failure, move the file to `Backups/corrupt-<timestamp>.json` and return a fresh database plus a user-facing message.
+- **Newer or unreadable files:** a file with a newer schema version, or a file that cannot be read, is left in place. The app shows a warning and saves nothing until the user imports a backup or resets the data.
 - **Export/import:** `encode(_:)`/`decode(_:)` are the same code path used by the UI. Newer schema versions are rejected with a clear error.
 - **Settings tolerance:** all settings groups decode missing keys to defaults, so adding a setting does not invalidate existing files.
 
