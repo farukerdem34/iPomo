@@ -85,7 +85,7 @@ struct ProjectEditorView: View {
                         EditorialToggleRow(
                             title: "Target date",
                             detail: dueEnabled ? nil : "Optional deadline for the project.",
-                            isOn: $dueEnabled.animation()
+                            isOn: $dueEnabled
                         )
                         if dueEnabled {
                             EditorialDateField(date: $dueDate)
@@ -95,7 +95,7 @@ struct ProjectEditorView: View {
                         EditorialToggleRow(
                             title: "Pomodoro target",
                             detail: targetEnabled ? nil : "Optional planning target.",
-                            isOn: $targetEnabled.animation()
+                            isOn: $targetEnabled
                         )
                         if targetEnabled {
                             HStack {

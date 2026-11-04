@@ -60,7 +60,7 @@ struct RootView: View {
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: model.banner?.id)
+        .animation(Motion.calm(reduceMotion), value: model.banner?.id)
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase != .active {
                 model.flush()

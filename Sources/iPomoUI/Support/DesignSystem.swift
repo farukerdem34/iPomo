@@ -675,10 +675,13 @@ struct EditorialDateField: View {
 
 struct EditorialToggleStyle: ToggleStyle {
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         Button {
-            configuration.isOn.toggle()
+            withAnimation(Motion.calm(reduceMotion, duration: 0.15)) {
+                configuration.isOn.toggle()
+            }
         } label: {
             Capsule(style: .continuous)
                 .fill(configuration.isOn ? accent : DesignTokens.surfaceMuted)
@@ -697,7 +700,6 @@ struct EditorialToggleStyle: ToggleStyle {
                             lineWidth: 1
                         )
                 )
-                .animation(.easeInOut(duration: 0.15), value: configuration.isOn)
         }
         .buttonStyle(.plain)
     }

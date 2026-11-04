@@ -84,7 +84,7 @@ struct TaskEditorView: View {
                         EditorialToggleRow(
                             title: "Due date",
                             detail: dueEnabled ? nil : "Give this task a day to land.",
-                            isOn: $dueEnabled.animation()
+                            isOn: $dueEnabled
                         )
                         if dueEnabled {
                             EditorialDateField(date: $dueDate)
