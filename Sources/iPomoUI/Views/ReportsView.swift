@@ -5,6 +5,7 @@ import SwiftUI
 struct ReportsView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showManualEntry = false
     @State private var sessionToDelete: FocusSession?
 
@@ -187,6 +188,10 @@ struct ReportsView: View {
                 }
                 .frame(height: 230)
                 .padding(.top, DesignTokens.s2)
+                .animation(
+                    Motion.calm(reduceMotion, duration: 0.35),
+                    value: summary.buckets.map { "\($0.label):\($0.minutes)" }
+                )
             }
         }
     }
