@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Local agent configuration and downloaded skills
+.claude/
+.agents/
+skills-lock.json
+
+# Private analysis material — never publish
+private/
+
+# SwiftPM and bundle outputs
+.build/
+.swiftpm/
+dist/
+DerivedData/
+
+# Generated codebase-memory index
+.codebase-memory/
+
+# Never commit secrets
+.env
+.env.*
+!.env.example
