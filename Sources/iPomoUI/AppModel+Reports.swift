@@ -49,10 +49,6 @@ extension AppModel {
             .reduce(0) { $0 + max(0, $1.actualSeconds) }
     }
 
-    func projectFocusSecondsThisWeek(_ projectID: UUID) -> Int {
-        reportSummary(range: .week, projectFilter: projectID).totalFocusSeconds
-    }
-
     var todayPlanFinishEstimate: FinishEstimate {
         FinishTimeCalculator.estimate(
             tasks: todayPlanTasks,

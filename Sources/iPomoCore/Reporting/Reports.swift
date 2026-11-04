@@ -35,7 +35,6 @@ public struct ReportSummary: Sendable {
     public let sessions: [FocusSession]
 
     public var totalFocusMinutes: Int { Int((Double(totalFocusSeconds) / 60.0).rounded()) }
-    public var hoursFocused: Double { Double(totalFocusSeconds) / 3600.0 }
     public var averageDailySeconds: Int {
         guard daysAccessed > 0 else { return 0 }
         return totalFocusSeconds / daysAccessed

@@ -1,8 +1,6 @@
 import Foundation
 
 public struct PlanTask: Identifiable, Codable, Hashable, Sendable {
-    public static let inboxName = "No Project"
-
     public var id: UUID
     public var title: String
     public var notes: String
@@ -57,10 +55,6 @@ public struct PlanTask: Identifiable, Codable, Hashable, Sendable {
             return estimatedPomodoros
         }
         return 1
-    }
-
-    public var remainingPomodoros: Double {
-        max(0, estimatedPomodoros - completedPomodoros)
     }
 
     public var progress: Double {

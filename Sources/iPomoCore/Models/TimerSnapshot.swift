@@ -10,7 +10,6 @@ public struct TimerSnapshot: Codable, Sendable, Equatable {
     /// Number of completed focus rounds. Used for the long-break interval.
     public var focusRoundCount: Int
     public var activeTaskID: UUID?
-    public var lastFinishedAt: Date?
 
     public init(
         stage: Stage = .focus,
@@ -18,8 +17,7 @@ public struct TimerSnapshot: Codable, Sendable, Equatable {
         accumulatedSeconds: Double = 0,
         startedAt: Date? = nil,
         focusRoundCount: Int = 0,
-        activeTaskID: UUID? = nil,
-        lastFinishedAt: Date? = nil
+        activeTaskID: UUID? = nil
     ) {
         self.stage = stage
         self.isRunning = isRunning
@@ -27,12 +25,11 @@ public struct TimerSnapshot: Codable, Sendable, Equatable {
         self.startedAt = startedAt
         self.focusRoundCount = focusRoundCount
         self.activeTaskID = activeTaskID
-        self.lastFinishedAt = lastFinishedAt
     }
 
     private enum CodingKeys: String, CodingKey {
         case stage, isRunning, accumulatedSeconds, startedAt
-        case focusRoundCount, activeTaskID, lastFinishedAt
+        case focusRoundCount, activeTaskID
     }
 
     public init(from decoder: Decoder) throws {
@@ -43,7 +40,6 @@ public struct TimerSnapshot: Codable, Sendable, Equatable {
         startedAt = try c.decodeIfPresent(Date.self, forKey: .startedAt)
         focusRoundCount = try c.decodeIfPresent(Int.self, forKey: .focusRoundCount) ?? 0
         activeTaskID = try c.decodeIfPresent(UUID.self, forKey: .activeTaskID)
-        lastFinishedAt = try c.decodeIfPresent(Date.self, forKey: .lastFinishedAt)
         accumulatedSeconds = max(0, accumulatedSeconds)
         focusRoundCount = max(0, focusRoundCount)
         if !isRunning { startedAt = nil }

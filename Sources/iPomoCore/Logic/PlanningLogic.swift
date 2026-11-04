@@ -14,10 +14,6 @@ public struct ProjectProgress: Sendable, Equatable {
         }
         return min(1, max(0, completedPomodoros / estimatedPomodoros))
     }
-
-    public var remainingPomodoros: Double {
-        max(0, estimatedPomodoros - completedPomodoros)
-    }
 }
 
 // MARK: - Finish estimate
@@ -30,9 +26,6 @@ public struct FinishEstimate: Sendable, Equatable {
     public let finishDate: Date
     public let focusRounds: Int
     public let taskStarts: [UUID: Date]
-
-    public var hours: Double { totalSeconds / 3600.0 }
-    public var remainingMinutes: Int { Int((remainingPomodoros * 1).rounded()) }
 }
 
 public enum PlanningLogic {
@@ -45,10 +38,6 @@ public enum PlanningLogic {
             estimatedPomodoros: estimated,
             completedPomodoros: completed
         )
-    }
-
-    public static func completedPomodoroUnit(for task: PlanTask) -> Double {
-        task.pomodoroUnit
     }
 
     public static func shouldAutoComplete(task: PlanTask, settings: BehaviorSettings) -> Bool {
@@ -85,24 +74,6 @@ public enum PlanningLogic {
         return lhs.createdAt < rhs.createdAt
     }
 
-    public static func sortedForTasksView(_ tasks: [PlanTask], now: Date, calendar: Calendar) -> [PlanTask] {
-        tasks.sorted { lhs, rhs in
-            if lhs.isCompleted != rhs.isCompleted { return !lhs.isCompleted }
-            if lhs.priority != rhs.priority { return lhs.priority > rhs.priority }
-            let lhsOverdue = lhs.isOverdue(now: now, calendar: calendar)
-            let rhsOverdue = rhs.isOverdue(now: now, calendar: calendar)
-            if lhsOverdue != rhsOverdue { return lhsOverdue }
-            switch (lhs.dueDate, rhs.dueDate) {
-            case let (l?, r?):
-                if !calendar.isDate(l, inSameDayAs: r) { return l < r }
-            case (nil, _?): return false
-            case (_?, nil): return true
-            case (nil, nil): break
-            }
-            if lhs.sortOrder != rhs.sortOrder { return lhs.sortOrder < rhs.sortOrder }
-            return lhs.createdAt < rhs.createdAt
-        }
-    }
 }
 
 // MARK: - Finish time

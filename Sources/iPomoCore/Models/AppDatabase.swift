@@ -78,10 +78,6 @@ public struct AppDatabase: Codable, Sendable {
         tasks.filter { !$0.isCompleted }
     }
 
-    public var focusTodayTasks: [PlanTask] {
-        activeTasks.filter(\.isFocusToday)
-    }
-
     public func tasks(in projectID: UUID?) -> [PlanTask] {
         tasks.filter { $0.projectID == projectID }
     }
@@ -129,9 +125,5 @@ public struct AppDatabase: Codable, Sendable {
 
     public var totalFocusSeconds: Int {
         sessions.filter(\.isFocus).reduce(0) { $0 + max(0, $1.actualSeconds) }
-    }
-
-    public var totalSessions: Int {
-        sessions.filter(\.isFocus).count
     }
 }

@@ -70,7 +70,6 @@ accumulatedSeconds: Double   // consumed before startedAt
 startedAt: Date?             // current running segment
 focusRoundCount: Int         // completed focus rounds
 activeTaskID: UUID?
-lastFinishedAt: Date?
 ```
 The remaining time is always derived: `duration - accumulated - (now - startedAt)`.
 

@@ -110,9 +110,6 @@ public enum TimerMath {
     ) -> Date? {
         let progress = progress(snapshot: snapshot, settings: settings, task: task, now: now)
         guard progress.remainingSeconds > 0 else { return nil }
-        if snapshot.isRunning {
-            return now.addingTimeInterval(progress.remainingSeconds)
-        }
         return now.addingTimeInterval(progress.remainingSeconds)
     }
 }

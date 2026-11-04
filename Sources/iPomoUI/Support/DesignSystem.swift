@@ -67,7 +67,6 @@ enum DesignTokens {
     static let r1: CGFloat = 6
     static let r2: CGFloat = 8
     static let r3: CGFloat = 12
-    static let r4: CGFloat = 16
 
     static let sidebarWidth: CGFloat = 232
     static let contentMaxWidth: CGFloat = 1_120

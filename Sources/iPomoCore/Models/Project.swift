@@ -35,6 +35,4 @@ public struct Project: Identifiable, Codable, Hashable, Sendable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
-
-    public var isArchived: Bool { status == .archived }
 }

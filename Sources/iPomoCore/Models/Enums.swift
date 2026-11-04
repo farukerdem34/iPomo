@@ -17,24 +17,7 @@ public enum Stage: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    public var shortTitle: String {
-        switch self {
-        case .focus: return "Focus"
-        case .shortBreak: return "Short"
-        case .longBreak: return "Long"
-        }
-    }
-
-    public var systemImage: String {
-        switch self {
-        case .focus: return "timer"
-        case .shortBreak: return "cup.and.saucer"
-        case .longBreak: return "moon.zzz"
-        }
-    }
-
     public var isFocus: Bool { self == .focus }
-    public var isBreak: Bool { !isFocus }
 }
 
 // MARK: - Project
@@ -56,14 +39,6 @@ public enum ProjectStatus: String, Codable, CaseIterable, Identifiable, Sendable
         }
     }
 
-    public var systemImage: String {
-        switch self {
-        case .active: return "play.circle"
-        case .onHold: return "pause.circle"
-        case .completed: return "checkmark.circle"
-        case .archived: return "archivebox"
-        }
-    }
 }
 
 // MARK: - Task
@@ -80,14 +55,6 @@ public enum TaskPriority: Int, Codable, CaseIterable, Identifiable, Sendable, Co
         case .low: return "Low"
         case .medium: return "Medium"
         case .high: return "High"
-        }
-    }
-
-    public var systemImage: String {
-        switch self {
-        case .low: return "arrow.down.circle"
-        case .medium: return "minus.circle"
-        case .high: return "exclamationmark.circle"
         }
     }
 
@@ -259,8 +226,6 @@ public enum AppTheme: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    public var primaryHex: String { lightHex }
-
     public var lightHex: String {
         switch self {
         case .tomato: return "#B85C43"
@@ -286,19 +251,6 @@ public enum AppTheme: String, Codable, CaseIterable, Identifiable, Sendable {
         case .indigo: return "#94A2C4"
         }
     }
-
-    public var secondaryHex: String {
-        switch self {
-        case .tomato: return "#D89B7E"
-        case .emerald: return "#8C9E7A"
-        case .ocean: return "#7C96A3"
-        case .violet: return "#9B85A0"
-        case .amber: return "#C9A15E"
-        case .teal: return "#6E9E98"
-        case .rose: return "#C08A92"
-        case .indigo: return "#7483A3"
-        }
-    }
 }
 
 public enum ProjectPalette {
@@ -308,8 +260,4 @@ public enum ProjectPalette {
         "#9E5A63", "#6B6258", "#8A7A66", "#3D6B63",
     ]
 
-    public static func color(for index: Int) -> String {
-        guard !colors.isEmpty else { return "#6B6258" }
-        return colors[abs(index) % colors.count]
-    }
 }

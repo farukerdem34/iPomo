@@ -27,13 +27,6 @@ enum ThemeColors {
         Color.dynamic(lightHex: theme.lightHex, darkHex: theme.darkHex)
     }
 
-    static func secondary(_ theme: AppTheme) -> Color {
-        Color.dynamic(lightHex: theme.secondaryHex, darkHex: theme.secondaryHex)
-    }
-
-    static func project(_ hex: String) -> Color {
-        Color(hex: hex)
-    }
 }
 
 enum AppFormat {

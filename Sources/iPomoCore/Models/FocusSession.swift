@@ -47,8 +47,4 @@ public struct FocusSession: Identifiable, Codable, Hashable, Sendable {
     public var minutes: Int {
         Int((Double(actualSeconds) / 60.0).rounded())
     }
-
-    public var minutesExact: Double {
-        Double(actualSeconds) / 60.0
-    }
 }

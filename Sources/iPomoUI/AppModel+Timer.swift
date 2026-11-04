@@ -261,7 +261,6 @@ extension AppModel {
             database.timer.accumulatedSeconds = 0
             database.timer.isRunning = false
             database.timer.startedAt = nil
-            database.timer.lastFinishedAt = endedAt
         }
 
         stopTickingAudio()
