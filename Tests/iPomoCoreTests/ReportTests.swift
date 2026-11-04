@@ -113,6 +113,18 @@ import Testing
         #expect(nextDaySummary.currentStreak == 4)
     }
 
+    @Test func csvFormulaPrefixesAreEscaped() {
+        let session = TestSupport.session(
+            task: "=1+1",
+            project: "@SUM(A1)",
+            start: TestSupport.date(2026, 11, 4, hour: 9)
+        )
+        let csv = ReportCSV.makeCSV(sessions: [session], calendar: TestSupport.calendar)
+        let row = csv.split(separator: "\n")[1]
+        #expect(row.contains("'=1+1"))
+        #expect(row.contains("'@SUM(A1)"))
+    }
+
     @Test func csvEscaping() {
         let session = TestSupport.session(
             task: "Task, with \"quotes\"",

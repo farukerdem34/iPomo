@@ -246,8 +246,9 @@ public enum ReportCSV {
     }
 
     public static func escape(_ value: String) -> String {
-        let needsQuoting = value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r")
-        let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
+        let guarded = value.first.map { "=+-@".contains($0) } == true ? "'" + value : value
+        let needsQuoting = guarded.contains(",") || guarded.contains("\"") || guarded.contains("\n") || guarded.contains("\r")
+        let escaped = guarded.replacingOccurrences(of: "\"", with: "\"\"")
         return needsQuoting ? "\"\(escaped)\"" : escaped
     }
 }
