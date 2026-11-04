@@ -29,6 +29,7 @@ public struct FinishEstimate: Sendable, Equatable {
     public let totalSeconds: Double
     public let finishDate: Date
     public let focusRounds: Int
+    public let taskStarts: [UUID: Date]
 
     public var hours: Double { totalSeconds / 3600.0 }
     public var remainingMinutes: Int { Int((remainingPomodoros * 1).rounded()) }
@@ -110,35 +111,116 @@ public enum FinishTimeCalculator {
     public static func estimate(
         tasks: [PlanTask],
         settings: TimerSettings,
+        timer: TimerSnapshot = TimerSnapshot(),
         now: Date = Date(),
         calendar: Calendar
     ) -> FinishEstimate {
         let liveTasks = tasks.filter { !$0.isCompleted }
-        let focusSeconds = max(1, settings.focusMinutes * 60)
-        var remaining = 0.0
-        var rounds = 0
+        let baseFocus = max(1, settings.focusMinutes * 60)
+        let interval = max(1, settings.longBreakInterval)
 
-        for task in liveTasks {
+        func plannedRoundCount(_ task: PlanTask) -> Int {
             let left = max(0, task.estimatedPomodoros - task.completedPomodoros)
-            guard left > 0 else { continue }
-            if task.estimatedPomodoros > 0 && task.estimatedPomodoros < 1 {
-                remaining += task.estimatedPomodoros
-                rounds += 1
+            guard left > 0 else { return 0 }
+            if task.estimatedPomodoros > 0, task.estimatedPomodoros < 1 {
+                return 1
+            }
+            return Int(ceil(left))
+        }
+
+        let hasProgress = timer.isRunning || timer.accumulatedSeconds > 0.05
+        let activeTask = liveTasks.first { $0.id == timer.activeTaskID }
+        let currentRemaining = hasProgress
+            ? TimerMath.progress(snapshot: timer, settings: settings, task: activeTask, now: now).remainingSeconds
+            : 0
+        let hasCurrentRound = hasProgress && currentRemaining > 0.05
+        let firstTask = liveTasks.first
+        let currentRoundIsFirst = hasCurrentRound
+            && timer.stage == .focus
+            && timer.activeTaskID != nil
+            && timer.activeTaskID == firstTask?.id
+            && firstTask.map(plannedRoundCount) ?? 0 > 0
+
+        var preBreakSeconds = 0.0
+        var preFocusSeconds = 0.0
+        if hasCurrentRound {
+            if timer.stage == .focus {
+                if !currentRoundIsFirst {
+                    preFocusSeconds = currentRemaining
+                }
             } else {
-                remaining += left
-                rounds += Int(ceil(left))
+                preBreakSeconds = currentRemaining
             }
         }
 
-        let focusTotal = remaining * focusSeconds
+        var rounds: [(task: PlanTask, duration: Double, count: Int)] = []
+        var totalRounds = preFocusSeconds > 0 ? 1 : 0
+        for task in liveTasks {
+            let count = plannedRoundCount(task)
+            guard count > 0 else { continue }
+            var effectiveCount = count
+            if preFocusSeconds > 0, task.id == timer.activeTaskID {
+                effectiveCount -= 1
+            }
+            guard effectiveCount > 0 else { continue }
+            let fractional = task.estimatedPomodoros > 0 && task.estimatedPomodoros < 1
+            let duration = fractional ? baseFocus * task.estimatedPomodoros : baseFocus
+            rounds.append((task, duration, effectiveCount))
+            totalRounds += effectiveCount
+        }
+
+        var remaining = 0.0
+        for task in liveTasks {
+            let left = max(0, task.estimatedPomodoros - task.completedPomodoros)
+            guard left > 0 else { continue }
+            if task.estimatedPomodoros > 0, task.estimatedPomodoros < 1 {
+                remaining += task.estimatedPomodoros
+            } else {
+                remaining += left
+            }
+        }
+
+        var cursor = now
+        var focusTotal = 0.0
         var breaks = 0.0
-        if rounds > 1 {
-            for round in 1..<rounds {
-                if round % max(1, settings.longBreakInterval) == 0 {
-                    breaks += settings.longBreakMinutes * 60
-                } else {
-                    breaks += settings.shortBreakMinutes * 60
-                }
+        var roundsCompleted = max(0, timer.focusRoundCount)
+        var roundsScheduled = 0
+        var taskStarts: [UUID: Date] = [:]
+
+        func scheduleBreak() {
+            let duration = (roundsCompleted % interval == 0
+                ? settings.longBreakMinutes
+                : settings.shortBreakMinutes) * 60
+            cursor = cursor.addingTimeInterval(duration)
+            breaks += duration
+        }
+
+        func scheduleRound(taskID: UUID?, duration: Double) {
+            if let taskID, taskStarts[taskID] == nil {
+                taskStarts[taskID] = cursor
+            }
+            cursor = cursor.addingTimeInterval(duration)
+            focusTotal += duration
+            roundsCompleted += 1
+            roundsScheduled += 1
+            if roundsScheduled < totalRounds {
+                scheduleBreak()
+            }
+        }
+
+        if preBreakSeconds > 0 {
+            cursor = cursor.addingTimeInterval(preBreakSeconds)
+            breaks += preBreakSeconds
+        }
+        if preFocusSeconds > 0 {
+            scheduleRound(taskID: nil, duration: preFocusSeconds)
+        }
+        for entry in rounds {
+            for index in 0..<entry.count {
+                let duration = currentRoundIsFirst && entry.task.id == firstTask?.id && index == 0
+                    ? currentRemaining
+                    : entry.duration
+                scheduleRound(taskID: entry.task.id, duration: duration)
             }
         }
 
@@ -149,7 +231,8 @@ public enum FinishTimeCalculator {
             breakSeconds: breaks,
             totalSeconds: total,
             finishDate: now.addingTimeInterval(total),
-            focusRounds: rounds
+            focusRounds: totalRounds,
+            taskStarts: taskStarts
         )
     }
 }

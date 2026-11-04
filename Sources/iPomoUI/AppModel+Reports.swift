@@ -57,6 +57,7 @@ extension AppModel {
         FinishTimeCalculator.estimate(
             tasks: todayPlanTasks,
             settings: database.settings.timer,
+            timer: database.timer,
             now: now,
             calendar: calendar
         )

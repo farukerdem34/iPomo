@@ -275,26 +275,10 @@ struct DashboardView: View {
     }
 
     private var projectedRows: [ProjectedRow] {
-        var cursor = model.now
-        var rows: [ProjectedRow] = []
-        let timer = model.database.settings.timer
-        let focus = max(1, timer.focusMinutes * 60)
-        let shortBreak = max(0, timer.shortBreakMinutes * 60)
-        let longBreak = max(0, timer.longBreakMinutes * 60)
-        let interval = max(1, timer.longBreakInterval)
-
-        for (index, task) in model.todayPlanTasks.enumerated() {
-            rows.append(ProjectedRow(task: task, start: cursor))
-            let remaining = max(0, task.estimatedPomodoros - task.completedPomodoros)
-            let focusSeconds = task.estimatedPomodoros > 0 && task.estimatedPomodoros < 1
-                ? focus * task.estimatedPomodoros
-                : focus * remaining
-            cursor = cursor.addingTimeInterval(focusSeconds)
-            if index < model.todayPlanTasks.count - 1 {
-                cursor = cursor.addingTimeInterval((index + 1) % interval == 0 ? longBreak : shortBreak)
-            }
+        let estimate = model.todayPlanFinishEstimate
+        return model.todayPlanTasks.map { task in
+            ProjectedRow(task: task, start: estimate.taskStarts[task.id] ?? model.now)
         }
-        return rows
     }
 
     private func addQuickTask() {

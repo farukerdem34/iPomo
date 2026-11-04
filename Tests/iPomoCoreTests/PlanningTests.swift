@@ -77,4 +77,46 @@ import Testing
         // Rounds 1..4 between rounds: short, short, short, long => 300*3 + 900 = 1800.
         #expect(abs(estimate.breakSeconds - 1800) < 0.0001)
     }
+
+    @Test func finishEstimatePlacesBreaksBetweenRoundsOfOneTask() {
+        let now = TestSupport.date(2026, 11, 4, hour: 9)
+        let first = TestSupport.task("A", estimate: 2)
+        let second = TestSupport.task("B", estimate: 1)
+        let estimate = FinishTimeCalculator.estimate(
+            tasks: [first, second],
+            settings: TimerSettings(),
+            now: now,
+            calendar: TestSupport.calendar
+        )
+        // A round, break, A round, break, B round.
+        #expect(estimate.taskStarts[first.id] == now)
+        #expect(estimate.taskStarts[second.id] == now.addingTimeInterval(60 * 60))
+        #expect(estimate.finishDate == now.addingTimeInterval(85 * 60))
+    }
+
+    @Test func finishEstimateUsesCurrentRoundAndCyclePosition() {
+        let now = TestSupport.date(2026, 11, 4, hour: 9)
+        let first = TestSupport.task("A", estimate: 2)
+        let second = TestSupport.task("B", estimate: 1)
+        let timer = TimerSnapshot(
+            stage: .focus,
+            isRunning: false,
+            accumulatedSeconds: 1_200,
+            focusRoundCount: 3,
+            activeTaskID: first.id
+        )
+        let estimate = FinishTimeCalculator.estimate(
+            tasks: [first, second],
+            settings: TimerSettings(),
+            timer: timer,
+            now: now,
+            calendar: TestSupport.calendar
+        )
+        // 5 minutes remain in A; round 4 earns a long break; then A round 2,
+        // a short break, and B.
+        #expect(timer.focusRoundCount == 3)
+        #expect(estimate.taskStarts[first.id] == now)
+        #expect(estimate.taskStarts[second.id] == now.addingTimeInterval(50 * 60))
+        #expect(estimate.finishDate == now.addingTimeInterval(75 * 60))
+    }
 }
