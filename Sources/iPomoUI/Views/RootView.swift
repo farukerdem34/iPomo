@@ -45,6 +45,7 @@ struct RootView: View {
         } message: {
             Text("The current focus round will be reset for “\(model.pendingSwitch?.taskTitle ?? "the new task")”.")
         }
+        .background(MainWindowMarker().frame(width: 0, height: 0))
         .overlay(alignment: .top) {
             if let banner = model.banner {
                 BannerView(banner: banner)

@@ -172,6 +172,9 @@ final class AppModel: ObservableObject {
             if let textField = NSApp.keyWindow?.firstResponder as? NSTextField, textField.isEditable {
                 return event
             }
+            if NSApp.keyWindow?.firstResponder is NSControl {
+                return event
+            }
 
             Task { @MainActor in
                 self.toggleTimer()
