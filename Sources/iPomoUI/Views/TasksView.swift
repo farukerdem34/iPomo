@@ -21,18 +21,18 @@ struct TasksView: View {
         return results
     }
 
-    private var sections: [TaskSection] {
+    private func sections(_ tasks: [PlanTask]) -> [TaskSection] {
         if isSearching {
-            return [TaskSection(title: "Results", tasks: filteredTasks)]
+            return [TaskSection(title: "Results", tasks: tasks)]
         }
         if model.taskScope != .active {
-            return [TaskSection(title: model.taskScope.title, tasks: manualOrder(filteredTasks))]
+            return [TaskSection(title: model.taskScope.title, tasks: manualOrder(tasks))]
         }
         let now = model.now
         let calendar = model.calendar
         let separateCompleted = model.database.settings.behavior.moveCompletedToBottom
-        let grouped = separateCompleted ? filteredTasks.filter { !$0.isCompleted } : filteredTasks
-        let completed = separateCompleted ? filteredTasks.filter(\.isCompleted) : []
+        let grouped = separateCompleted ? tasks.filter { !$0.isCompleted } : tasks
+        let completed = separateCompleted ? tasks.filter(\.isCompleted) : []
 
         var buckets: [String: [PlanTask]] = [
             "Overdue": [], "Today": [], "Next 7 Days": [], "Later": [], "No Date": [],
@@ -112,8 +112,9 @@ struct TasksView: View {
     }
 
     var body: some View {
+        let tasks = filteredTasks
         VStack(alignment: .leading, spacing: 0) {
-            header
+            header(tasks)
                 .padding(.horizontal, DesignTokens.s5)
                 .padding(.top, DesignTokens.s4)
             searchRow
@@ -125,7 +126,7 @@ struct TasksView: View {
                 .padding(.bottom, DesignTokens.s3)
             Hairline()
 
-            if filteredTasks.isEmpty {
+            if tasks.isEmpty {
                 EditorialEmptyState(
                     overline: isSearching || hasTasks ? "No matches" : "Nothing here",
                     title: emptyStateTitle,
@@ -136,7 +137,7 @@ struct TasksView: View {
                 .padding(.horizontal, DesignTokens.s5)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             } else {
-                taskList
+                taskList(tasks)
             }
         }
         .editorialBackground()
@@ -146,12 +147,12 @@ struct TasksView: View {
         }
     }
 
-    private var header: some View {
+    private func header(_ tasks: [PlanTask]) -> some View {
         HStack(alignment: .top, spacing: DesignTokens.s4) {
             PageTitle(
                 eyebrow: "Work",
                 title: "Tasks",
-                detail: "\(filteredTasks.count) shown · \(model.activeTasks.count) open"
+                detail: "\(tasks.count) shown · \(model.activeTasks.count) open"
             )
             Spacer()
             Menu {
@@ -236,9 +237,9 @@ struct TasksView: View {
         }
     }
 
-    private var taskList: some View {
+    private func taskList(_ tasks: [PlanTask]) -> some View {
         List {
-            ForEach(sections) { section in
+            ForEach(sections(tasks)) { section in
                 TaskSectionView(section: section, canMove: !isSearching)
             }
         }

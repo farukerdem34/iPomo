@@ -99,6 +99,7 @@ final class AppModel: ObservableObject {
     private var keyMonitor: Any?
     private var dataIsReadOnly = false
     private(set) var dataReadOnlyMessage: String?
+    private var lastIdleRefresh = Date()
 
     // MARK: Init
 
@@ -210,7 +211,11 @@ final class AppModel: ObservableObject {
     }
 
     private func tick() {
-        now = Date()
+        let current = Date()
+        if database.timer.isRunning || current.timeIntervalSince(lastIdleRefresh) >= 30 {
+            lastIdleRefresh = current
+            now = current
+        }
         checkTimerCompletion()
     }
 

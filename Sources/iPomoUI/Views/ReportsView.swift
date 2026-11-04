@@ -8,21 +8,18 @@ struct ReportsView: View {
     @State private var showManualEntry = false
     @State private var sessionToDelete: FocusSession?
 
-    private var summary: ReportSummary {
-        model.currentReportSummary
-    }
-
     var body: some View {
+        let summary = model.currentReportSummary
         ScrollView {
             VStack(alignment: .leading, spacing: DesignTokens.s4) {
-                header
+                header(summary)
                 controls
-                MetricLedger(metrics: metrics)
-                chartSection
+                MetricLedger(metrics: metrics(summary))
+                chartSection(summary)
                 HStack(alignment: .top, spacing: DesignTokens.s5) {
-                    projectSection
+                    projectSection(summary)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
-                    sessionSection
+                    sessionSection(summary)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
             }
@@ -54,12 +51,12 @@ struct ReportsView: View {
         }
     }
 
-    private var header: some View {
+    private func header(_ summary: ReportSummary) -> some View {
         HStack(alignment: .top, spacing: DesignTokens.s4) {
             PageTitle(
                 eyebrow: "Insight",
                 title: "Reports",
-                detail: rangeSubtitle
+                detail: rangeSubtitle(summary)
             )
             Spacer()
             Button {
@@ -114,13 +111,13 @@ struct ReportsView: View {
         }
     }
 
-    private var rangeSubtitle: String {
+    private func rangeSubtitle(_ summary: ReportSummary) -> String {
         let start = AppFormat.shortDate(summary.interval.start, calendar: model.calendar)
         let end = AppFormat.shortDate(summary.interval.end.addingTimeInterval(-1), calendar: model.calendar)
         return "\(start) – \(end) · \(summary.totalFocusMinutes) minutes focused"
     }
 
-    private var metrics: [LedgerMetric] {
+    private func metrics(_ summary: ReportSummary) -> [LedgerMetric] {
         [
             LedgerMetric(
                 label: "Focus time",
@@ -145,12 +142,12 @@ struct ReportsView: View {
         ]
     }
 
-    private var chartSection: some View {
+    private func chartSection(_ summary: ReportSummary) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.s3) {
             HStack(alignment: .firstTextBaseline) {
                 SectionHeading(
                     overline: "Focus",
-                    title: "Focus by \(bucketUnit)",
+                    title: "Focus by \(bucketUnit(summary))",
                     detail: summary.topProject.map { "Top project · \($0.name)" }
                 )
                 Spacer()
@@ -194,7 +191,7 @@ struct ReportsView: View {
         }
     }
 
-    private var bucketUnit: String {
+    private func bucketUnit(_ summary: ReportSummary) -> String {
         switch summary.range {
         case .today: return "session"
         case .week: return "day"
@@ -203,7 +200,7 @@ struct ReportsView: View {
         }
     }
 
-    private var projectSection: some View {
+    private func projectSection(_ summary: ReportSummary) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.s2) {
             SectionHeading(overline: "Projects", title: "Where time went")
             Hairline()
@@ -246,7 +243,7 @@ struct ReportsView: View {
         }
     }
 
-    private var sessionSection: some View {
+    private func sessionSection(_ summary: ReportSummary) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.s2) {
             HStack(alignment: .firstTextBaseline) {
                 SectionHeading(overline: "Detail", title: "Focus sessions")
