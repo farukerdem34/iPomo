@@ -82,8 +82,8 @@ Bug reports, feature requests, and pull requests are welcome.
 - **Documentation** — update the relevant file under `docs/` and the
   README when behavior or workflows change.
 
-iPomo is released under the [MIT License](LICENSE). By contributing,
-you agree that your contributions are licensed under the same terms.
+iPomo is released under the [GNU General Public License v2.0](LICENSE). By
+contributing, you agree that your contributions are licensed under the same terms.
 
 ## How to build?
 
