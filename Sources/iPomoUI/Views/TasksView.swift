@@ -134,15 +134,23 @@ struct TasksView: View {
             Hairline()
 
             if tasks.isEmpty {
-                EditorialEmptyState(
-                    overline: isSearching || hasTasks ? "No matches" : "Nothing here",
-                    title: emptyStateTitle,
-                    message: emptyStateMessage,
-                    actionTitle: emptyStateActionTitle,
-                    action: emptyStateActionTitle == nil ? nil : handleEmptyStateAction
-                )
-                .padding(.horizontal, DesignTokens.s5)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                // A List must stay in the detail column: without one the split
+                // view resizes to the content's height and breaks the window layout.
+                List {
+                    EditorialEmptyState(
+                        overline: isSearching || hasTasks ? "No matches" : "Nothing here",
+                        title: emptyStateTitle,
+                        message: emptyStateMessage,
+                        actionTitle: emptyStateActionTitle,
+                        action: emptyStateActionTitle == nil ? nil : handleEmptyStateAction
+                    )
+                    .padding(.horizontal, DesignTokens.s5)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
             } else {
                 taskList(tasks)
             }
