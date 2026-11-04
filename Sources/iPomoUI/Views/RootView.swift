@@ -4,15 +4,21 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         NavigationSplitView {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: 220, ideal: DesignTokens.sidebarWidth, max: 264)
         } detail: {
-            detailView
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(DesignTokens.canvas)
+            ZStack {
+                detailView
+                    .id(model.selectedSidebar ?? .today)
+                    .transition(.opacity)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(DesignTokens.canvas)
+            .animation(Motion.calm(reduceMotion, duration: 0.18), value: model.selectedSidebar ?? .today)
         }
         .frame(minWidth: 1_080, minHeight: 680)
         .background(DesignTokens.canvas)
