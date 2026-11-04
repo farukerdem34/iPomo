@@ -94,7 +94,7 @@ are enough for a native build; a universal release build also needs full Xcode.
 git clone <repository-url>
 cd <cloned-repository>
 
-swift test                        # run the 45 tests
+swift test                        # run the 51 tests
 ./scripts/build-app.sh release    # build dist/iPomo.app
 open dist/iPomo.app
 # or: ./scripts/run-app.sh release

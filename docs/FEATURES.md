@@ -68,7 +68,7 @@ iPomo is a native SwiftUI app for focus sessions and project planning. It keeps 
 ## Build and run
 
 ```bash
-swift test                       # 45 tests (core, app model, opt-in snapshot)
+swift test                       # 51 tests (core, app model, opt-in snapshot)
 ./scripts/build-app.sh release   # builds dist/iPomo.app
 open dist/iPomo.app
 # or:
@@ -156,8 +156,8 @@ Sources/iPomoUI/            SwiftUI application library
   Views/                      Dashboard, Timer, Tasks, Projects, Reports, Settings, menu bar
   Support/                    Design system, sound, notifications, formatting
 Sources/iPomoApp/           Executable launcher
-Tests/iPomoCoreTests/       33 core Swift Testing tests
-Tests/iPomoAppTests/        11 app-model tests + 1 opt-in visual snapshot test
+Tests/iPomoCoreTests/       38 core Swift Testing tests
+Tests/iPomoAppTests/        12 app-model tests + 1 opt-in visual snapshot test
 docs/                          Features, workflows, architecture, brand spec
 ```
 

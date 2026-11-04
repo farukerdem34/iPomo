@@ -9,19 +9,21 @@ exhaustive UI testing.
 ```
 $ swift test
 ...
-✔ Test run with 45 tests passed after 0.011 seconds.
+✔ Test run with 51 tests passed after 0.011 seconds.
 ```
 
 Coverage:
 
-- **iPomoCoreTests (33):** search semantics and regressions, timer math, long-break
-  scheduling, fractional estimates, finish-time estimates, report buckets/projects/
-  streaks/CSV, JSON persistence (including legacy archive-flag tolerance), corrupt-file
-  recovery, tolerant settings decoding, schema rejection, backups.
-- **iPomoAppTests (12):** task persistence across reloads, focus completion and task
+- **iPomoCoreTests (38):** search semantics and regressions, timer math, long-break
+  scheduling, fractional estimates, round-aware finish estimates, report buckets/projects/
+  streaks/CSV (including formula prefixes), JSON persistence (including legacy archive-flag
+  tolerance), corrupt-file recovery, newer-schema preservation, tolerant settings decoding,
+  schema rejection, backups, and import-value clamping.
+- **iPomoAppTests (13):** task persistence across reloads, focus completion and task
   credit, long-break transition, auto-check clearing, fractional credit, skip-as-
   completion for focus and breaks, partial session on reset, manual report entries,
-  project deletion with/without tasks, and one opt-in visual snapshot case.
+  project deletion with/without tasks, overdue-timer restore, and one opt-in visual
+  snapshot case.
 
 ## Visual snapshots
 

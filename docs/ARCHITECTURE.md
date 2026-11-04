@@ -202,7 +202,7 @@ Reports never require an account, network, or premium state.
 
 ## Verification
 
-- `swift test` — 45 Swift Testing cases (33 core + 11 app-model + 1 opt-in snapshot).
+- `swift test` — 51 Swift Testing cases (38 core + 12 app-model + 1 opt-in snapshot).
 - `IPOMO_SNAPSHOT_DIR=… swift test --filter SnapshotTests` — renders every screen in light, Today/Timer/Settings in dark, a wide-window dashboard, the sidebar, the editors, the manual-entry sheet, and the menu-bar panel through an offscreen `NSHostingView`.
 - `swift build` — compiles the app.
 - `./scripts/build-app.sh release` — bundles, lints `Info.plist`, ad-hoc signs.
