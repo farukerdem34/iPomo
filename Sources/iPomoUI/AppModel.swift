@@ -456,21 +456,6 @@ final class AppModel: ObservableObject {
         }
     }
 
-    func moveTask(id: UUID, up: Bool) {
-        let sorted = database.activeTasks.sorted { PlanningLogic.planSort($0, $1) }
-        guard let index = sorted.firstIndex(where: { $0.id == id }) else { return }
-        let target = up ? index - 1 : index + 1
-        guard sorted.indices.contains(target) else { return }
-        var reordered = sorted
-        reordered.swapAt(index, target)
-        mutate { database in
-            for (order, task) in reordered.enumerated() {
-                guard let taskIndex = database.tasks.firstIndex(where: { $0.id == task.id }) else { continue }
-                database.tasks[taskIndex].sortOrder = order
-            }
-        }
-    }
-
     // MARK: Project intents
 
     func presentNewProject() {

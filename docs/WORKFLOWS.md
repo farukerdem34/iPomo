@@ -66,9 +66,9 @@ Every user-facing workflow, in the order a new user is likely to encounter it.
 
 ## 6. Reorder tasks
 
-- Drag a row within its section.
-- Or use the row menu → **Move Up** / **Move Down**.
-- Manual order is stored as `sortOrder`; ties fall back to priority/due/created order.
+- Drag a row within its due-date section.
+- Manual order is stored as `sortOrder` and wins inside that section.
+- Search results keep relevance order and cannot be dragged.
 
 ## 7. Create and manage projects
 

@@ -24,7 +24,7 @@ iPomo is a native SwiftUI app for focus sessions and project planning. It keeps 
 ### Tasks
 - Create, edit, duplicate, complete, delete, and reorder tasks.
 - Title, notes, project, estimated pomodoros, priority, due date, and a "today" flag.
-- Drag reordering with `List.onMove`, plus explicit Move Up / Move Down commands.
+- Drag reordering inside each due-date section; search results keep relevance order.
 - Search across titles, notes, and project names with consistent semantics:
   - searches every task, not a Todoist import modal;
   - splits on any whitespace, not only a single ASCII space;

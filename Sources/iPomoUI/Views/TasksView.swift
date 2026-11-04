@@ -22,11 +22,11 @@ struct TasksView: View {
     }
 
     private var sections: [TaskSection] {
-        if !model.taskSearchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if isSearching {
             return [TaskSection(title: "Results", tasks: filteredTasks)]
         }
         if model.taskScope != .active {
-            return [TaskSection(title: model.taskScope.title, tasks: filteredTasks)]
+            return [TaskSection(title: model.taskScope.title, tasks: manualOrder(filteredTasks))]
         }
         let now = model.now
         let calendar = model.calendar
@@ -56,12 +56,22 @@ struct TasksView: View {
         let order = ["Overdue", "Today", "Next 7 Days", "Later", "No Date"]
         var result = order.compactMap { title -> TaskSection? in
             guard let tasks = buckets[title], !tasks.isEmpty else { return nil }
-            return TaskSection(title: title, tasks: tasks)
+            return TaskSection(title: title, tasks: manualOrder(tasks))
         }
         if !completed.isEmpty {
-            result.append(TaskSection(title: "Completed", tasks: completed))
+            result.append(TaskSection(title: "Completed", tasks: manualOrder(completed)))
         }
         return result
+    }
+
+    /// Manual order is the source of truth inside a due-date section, so a
+    /// drag is not overridden by a later priority or due-date comparison.
+    private func manualOrder(_ tasks: [PlanTask]) -> [PlanTask] {
+        tasks.sorted { lhs, rhs in
+            if lhs.sortOrder != rhs.sortOrder { return lhs.sortOrder < rhs.sortOrder }
+            if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
+            return lhs.id.uuidString < rhs.id.uuidString
+        }
     }
 
     private var isSearching: Bool {
@@ -229,7 +239,7 @@ struct TasksView: View {
     private var taskList: some View {
         List {
             ForEach(sections) { section in
-                TaskSectionView(section: section)
+                TaskSectionView(section: section, canMove: !isSearching)
             }
         }
         .listStyle(.plain)
@@ -247,6 +257,7 @@ private struct TaskSection: Identifiable {
 private struct TaskSectionView: View {
     @EnvironmentObject private var model: AppModel
     let section: TaskSection
+    let canMove: Bool
 
     var body: some View {
         Section {
@@ -256,13 +267,13 @@ private struct TaskSectionView: View {
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             }
-            .onMove { source, destination in
+            .onMove(perform: canMove ? { source, destination in
                 model.reorderTasks(
                     visibleIDs: section.tasks.map(\.id),
                     from: source,
                     to: destination
                 )
-            }
+            } : nil)
         } header: {
             HStack(spacing: DesignTokens.s2) {
                 Overline(section.title)
@@ -401,8 +412,6 @@ private struct TaskLedgerRow: View {
                 model.selectedSidebar = .timer
             }
             Button("Duplicate") { model.duplicateTask(id: task.id) }
-            Button("Move Up") { model.moveTask(id: task.id, up: true) }
-            Button("Move Down") { model.moveTask(id: task.id, up: false) }
             Button(task.isFocusToday ? "Remove from Today" : "Add to Today") {
                 model.setFocusToday(id: task.id, value: !task.isFocusToday)
             }
