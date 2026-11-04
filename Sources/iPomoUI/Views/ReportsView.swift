@@ -287,6 +287,7 @@ struct ReportsView: View {
 
 private struct SessionRow: View {
     @EnvironmentObject private var model: AppModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let session: FocusSession
     let onDelete: () -> Void
     @State private var hovering = false
@@ -332,5 +333,6 @@ private struct SessionRow: View {
         .padding(.vertical, 7)
         .background(hovering ? DesignTokens.surfaceMuted.opacity(0.3) : Color.clear)
         .onHover { hovering = $0 }
+        .animation(Motion.calm(reduceMotion, duration: 0.12), value: hovering)
     }
 }

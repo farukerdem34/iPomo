@@ -409,6 +409,7 @@ private struct DashboardTaskRow: View {
         )
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
+        .animation(Motion.calm(reduceMotion, duration: 0.12), value: hovering)
     }
 
     private var projectedTime: String {

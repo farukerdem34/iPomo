@@ -118,6 +118,7 @@ private enum ProjectStatusFilter: String, CaseIterable, Identifiable, Hashable {
 private struct ProjectLedgerRow: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let project: Project
     let onDelete: () -> Void
     @State private var hovering = false
@@ -215,6 +216,7 @@ private struct ProjectLedgerRow: View {
             .background(hovering ? DesignTokens.surfaceMuted.opacity(0.28) : Color.clear)
             .contentShape(Rectangle())
             .onHover { hovering = $0 }
+            .animation(Motion.calm(reduceMotion, duration: 0.12), value: hovering)
             .onTapGesture(count: 2) {
                 model.selectedSidebar = .tasks
                 model.taskProjectFilter = project.id
