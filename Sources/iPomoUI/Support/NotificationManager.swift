@@ -4,7 +4,9 @@ import UserNotifications
 @MainActor
 final class NotificationManager {
     private static let reminderPrefix = "ipomo.reminder."
+    private static let reminderIdentifiers = (0..<24).map { "\(reminderPrefix)\($0)" }
     private var requesting = false
+    private var pendingReminders: (reminders: [(offset: TimeInterval, body: String)], title: String)?
     private(set) var authorized = false
     private(set) var permissionError: String?
 
@@ -25,12 +27,17 @@ final class NotificationManager {
                 self?.authorized = granted
                 self?.permissionError = error?.localizedDescription
                 self?.requesting = false
+                if granted {
+                    self?.installPendingReminders()
+                } else {
+                    self?.pendingReminders = nil
+                }
             }
         }
     }
 
     func notify(title: String, body: String, identifier: String = UUID().uuidString) {
-        guard authorized, let center else { return }
+        guard let center else { return }
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
@@ -43,39 +50,42 @@ final class NotificationManager {
         center.add(request) { _ in }
     }
 
-    /// Schedules local reminders at the given offsets from now. All reminders share
-    /// a prefix so they can be removed when the timer pauses or advances.
-    func scheduleReminders(offsets: [TimeInterval], title: String, body: String) {
-        guard authorized, let center else { return }
+    /// Schedules local reminders at the given offsets from now. Permission is
+    /// requested if needed, and the reminders are installed once it is granted.
+    func scheduleReminders(_ reminders: [(offset: TimeInterval, body: String)], title: String) {
+        pendingReminders = (reminders, title)
+        if authorized {
+            installPendingReminders()
+        } else {
+            requestAuthorization()
+        }
+    }
+
+    /// Removes every reminder by its fixed identifier, so a late system reply
+    /// cannot delete reminders that were just scheduled.
+    func removeReminders() {
+        pendingReminders = nil
+        guard let center else { return }
+        center.removePendingNotificationRequests(withIdentifiers: Self.reminderIdentifiers)
+    }
+
+    private func installPendingReminders() {
+        guard let pending = pendingReminders, let center else { return }
+        pendingReminders = nil
         removeReminders()
-        for (index, offset) in offsets.enumerated() {
-            guard offset > 1 else { continue }
+        for (index, reminder) in pending.reminders.prefix(Self.reminderIdentifiers.count).enumerated() {
+            guard reminder.offset > 1 else { continue }
             let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
+            content.title = pending.title
+            content.body = reminder.body
             content.sound = .default
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: offset, repeats: false)
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: reminder.offset, repeats: false)
             let request = UNNotificationRequest(
-                identifier: "\(Self.reminderPrefix)\(index)",
+                identifier: Self.reminderIdentifiers[index],
                 content: content,
                 trigger: trigger
             )
             center.add(request) { _ in }
         }
-    }
-
-    func removeReminders() {
-        guard let center else { return }
-        center.getPendingNotificationRequests { requests in
-            let identifiers = requests
-                .map(\.identifier)
-                .filter { $0.hasPrefix(Self.reminderPrefix) }
-            guard !identifiers.isEmpty else { return }
-            center.removePendingNotificationRequests(withIdentifiers: identifiers)
-        }
-    }
-
-    func removeAllPending() {
-        center?.removeAllPendingNotificationRequests()
     }
 }

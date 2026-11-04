@@ -354,25 +354,32 @@ extension AppModel {
 
     private func scheduleRemindersIfNeeded(remaining: Double) {
         let settings = database.settings.notifications
-        guard settings.notificationsEnabled, settings.remindersEnabled else { return }
+        guard settings.notificationsEnabled, settings.remindersEnabled else {
+            notifications.removeReminders()
+            return
+        }
         let interval = TimeInterval(max(1, settings.reminderMinutes) * 60)
-        var offsets: [TimeInterval] = []
+        let stage = database.timer.stage.title.lowercased()
+        var reminders: [(offset: TimeInterval, body: String)] = []
         switch settings.reminderMode {
         case .last:
             let offset = remaining - interval
-            if offset > 1 { offsets = [offset] }
+            if offset > 1 {
+                reminders = [(offset, Self.reminderText(minutes: settings.reminderMinutes, stage: stage))]
+            }
         case .every:
             var offset = interval
-            while offset < remaining, offsets.count < 24 {
-                offsets.append(offset)
+            while offset < remaining, reminders.count < 24 {
+                let minutes = max(1, Int(((remaining - offset) / 60).rounded()))
+                reminders.append((offset, Self.reminderText(minutes: minutes, stage: stage)))
                 offset += interval
             }
         }
-        notifications.scheduleReminders(
-            offsets: offsets,
-            title: "iPomo reminder",
-            body: "\(settings.reminderMinutes) minutes remain in this \(database.timer.stage.title.lowercased())."
-        )
+        notifications.scheduleReminders(reminders, title: "iPomo reminder")
+    }
+
+    private static func reminderText(minutes: Int, stage: String) -> String {
+        "\(minutes) minute\(minutes == 1 ? "" : "s") remain\(minutes == 1 ? "s" : "") in this \(stage)."
     }
 
     /// Records the uncommitted portion of the current focus round, if any.
