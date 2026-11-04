@@ -205,6 +205,7 @@ struct TimerView: View {
                     .monospacedDigit()
                     .foregroundStyle(DesignTokens.ink)
                     .contentTransition(.numericText())
+                    .animation(Motion.calm(reduceMotion, duration: 0.25), value: model.countdownText)
                 Text(model.roundLabel)
                     .font(Typography.caption(11))
                     .foregroundStyle(DesignTokens.inkTertiary)

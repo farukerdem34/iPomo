@@ -27,6 +27,7 @@ struct MenuBarPanel: View {
                 .monospacedDigit()
                 .foregroundStyle(DesignTokens.ink)
                 .contentTransition(.numericText())
+                .animation(Motion.calm(reduceMotion, duration: 0.25), value: model.countdownText)
 
             ProgressView(value: model.timerProgress.fraction)
                 .progressViewStyle(EditorialProgressViewStyle(

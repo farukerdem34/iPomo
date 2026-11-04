@@ -4,6 +4,7 @@ import SwiftUI
 struct DashboardView: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.editorialAccent) private var accent
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var quickTaskTitle = ""
 
     var body: some View {
@@ -148,6 +149,7 @@ struct DashboardView: View {
                     .monospacedDigit()
                     .foregroundStyle(DesignTokens.onAccent)
                     .contentTransition(.numericText())
+                    .animation(Motion.calm(reduceMotion, duration: 0.25), value: model.countdownText)
                 Text(model.stage.title)
                     .font(Typography.caption(12))
                     .foregroundStyle(DesignTokens.onAccent.opacity(0.72))
