@@ -2,6 +2,10 @@ import Foundation
 
 public struct AppDatabase: Codable, Sendable {
     public static let currentSchemaVersion = 1
+    private static let maximumRecordedSeconds = 7 * 24 * 60 * 60
+    private static let maximumPomodoros = 999.0
+    private static let maximumSortOrder = 1_000_000
+    private static let maximumFocusRounds = 1_000_000
 
     public var schemaVersion: Int
     public var createdAt: Date
@@ -93,6 +97,9 @@ public struct AppDatabase: Codable, Sendable {
             }
             seenProjectIDs.insert(projects[index].id)
             projects[index].sortOrder = index
+            if let target = projects[index].targetPomodoros {
+                projects[index].targetPomodoros = min(Self.maximumPomodoros, max(0.1, target))
+            }
         }
         var seenTaskIDs = Set<UUID>()
         for index in tasks.indices {
@@ -103,7 +110,21 @@ public struct AppDatabase: Codable, Sendable {
             if let projectID = tasks[index].projectID, !seenProjectIDs.contains(projectID) {
                 tasks[index].projectID = nil
             }
+            tasks[index].estimatedPomodoros = min(Self.maximumPomodoros, max(0.1, tasks[index].estimatedPomodoros))
+            tasks[index].completedPomodoros = min(Self.maximumPomodoros, max(0, tasks[index].completedPomodoros))
+            tasks[index].sortOrder = min(Self.maximumSortOrder, max(0, tasks[index].sortOrder))
         }
+        var seenSessionIDs = Set<UUID>()
+        for index in sessions.indices {
+            if seenSessionIDs.contains(sessions[index].id) {
+                sessions[index].id = UUID()
+            }
+            seenSessionIDs.insert(sessions[index].id)
+            sessions[index].plannedSeconds = min(Self.maximumRecordedSeconds, max(0, sessions[index].plannedSeconds))
+            sessions[index].actualSeconds = min(Self.maximumRecordedSeconds, max(0, sessions[index].actualSeconds))
+        }
+        timer.focusRoundCount = min(Self.maximumFocusRounds, max(0, timer.focusRoundCount))
+        timer.accumulatedSeconds = min(Double(Self.maximumRecordedSeconds), max(0, timer.accumulatedSeconds))
     }
 
     public var totalFocusSeconds: Int {

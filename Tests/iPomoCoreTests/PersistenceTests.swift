@@ -69,6 +69,53 @@ import Testing
         #expect(backups.contains { $0.hasPrefix("corrupt-") })
     }
 
+    @Test func normalizationLimitsImportedNumbers() throws {
+        let directory = try makeDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let store = DatabaseStore(directoryURL: directory)
+        let now = TestSupport.date(2026, 11, 4)
+        let sessionID = UUID()
+        var database = AppDatabase()
+        database.tasks = [
+            PlanTask(title: "Huge", estimatedPomodoros: 1e12, completedPomodoros: 1e12, sortOrder: Int.max)
+        ]
+        database.sessions = [
+            FocusSession(
+                id: sessionID,
+                taskTitle: "A",
+                projectName: "",
+                startedAt: now,
+                endedAt: now,
+                plannedSeconds: Int.max,
+                actualSeconds: Int.max,
+                completed: true
+            ),
+            FocusSession(
+                id: sessionID,
+                taskTitle: "B",
+                projectName: "",
+                startedAt: now,
+                endedAt: now,
+                plannedSeconds: -5,
+                actualSeconds: -5,
+                completed: true
+            ),
+        ]
+        database.timer.focusRoundCount = Int.max
+        database.timer.accumulatedSeconds = 1e300
+
+        let decoded = try store.decode(store.encode(database))
+
+        #expect(decoded.sessions.count == 2)
+        #expect(Set(decoded.sessions.map(\.id)).count == 2)
+        #expect(decoded.sessions.allSatisfy { $0.actualSeconds <= 7 * 86_400 })
+        #expect(decoded.sessions.allSatisfy { $0.plannedSeconds >= 0 })
+        #expect(decoded.tasks.first?.estimatedPomodoros == 999)
+        #expect(decoded.tasks.first?.sortOrder == 1_000_000)
+        #expect(decoded.timer.focusRoundCount == 1_000_000)
+        #expect(decoded.timer.accumulatedSeconds <= 604_800)
+    }
+
     @Test func tolerantSettingsDecoding() throws {
         let directory = try makeDirectory()
         defer { try? FileManager.default.removeItem(at: directory) }
