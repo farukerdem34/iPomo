@@ -189,6 +189,7 @@ struct DashboardView: View {
             RoundedRectangle(cornerRadius: DesignTokens.r3, style: .continuous)
                 .fill(stageColor)
         )
+        .animation(Motion.calm(reduceMotion, duration: 0.3), value: model.stage)
     }
 
     private var projectsPanel: some View {

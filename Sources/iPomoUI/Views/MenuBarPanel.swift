@@ -106,6 +106,7 @@ struct MenuBarPanel: View {
         .padding(DesignTokens.s3)
         .frame(width: 306)
         .background(DesignTokens.canvas)
+        .animation(Motion.calm(reduceMotion, duration: 0.3), value: model.stage)
     }
 }
 
