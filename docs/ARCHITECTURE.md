@@ -168,7 +168,8 @@ Reports never require an account, network, or premium state.
 - `PlanningLogic.planSort` = priority desc, due date asc (undated last), manual order, created date.
 - The Tasks screen groups tasks by due date, then orders each group by `sortOrder` so drag order is authoritative; search results keep relevance order and cannot be dragged.
 - `PlanningLogic.projectProgress` = completed vs estimated pomodoros and task counts.
-- `FinishTimeCalculator.estimate` = remaining focus seconds for a task list plus short/long breaks between rounds; used by the Today plan and project planning.
+- `FinishTimeCalculator.estimate` = remaining focus seconds for a task list plus short/long breaks between rounds; used by the Today plan and project planning. Task starts account for the round in progress and the current focus-round count.
+- `PlanningSettings.planHorizonDays` sets how many days ahead the Tasks screen's Next bucket covers.
 
 ## UI composition
 

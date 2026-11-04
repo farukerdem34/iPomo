@@ -276,7 +276,10 @@ struct SettingsView: View {
             SettingsFieldRow(title: "Default task estimate") {
                 EstimateStepper(value: model.binding(\.planning.defaultEstimatedPomodoros))
             }
-            SettingsFieldRow(title: "Plan horizon") {
+            SettingsFieldRow(
+                title: "Plan horizon",
+                detail: "Tasks due within this many days fill the Next bucket."
+            ) {
                 stepperValue(model.binding(\.planning.planHorizonDays), range: 1...30, width: 30, label: "Plan horizon")
                 unitLabel("days")
             }

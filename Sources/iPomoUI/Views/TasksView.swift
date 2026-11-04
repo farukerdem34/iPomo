@@ -33,9 +33,16 @@ struct TasksView: View {
         let separateCompleted = model.database.settings.behavior.moveCompletedToBottom
         let grouped = separateCompleted ? tasks.filter { !$0.isCompleted } : tasks
         let completed = separateCompleted ? tasks.filter(\.isCompleted) : []
+        let horizonDays = model.database.settings.planning.planHorizonDays
+        let nextBucket = "Next \(horizonDays) Day\(horizonDays == 1 ? "" : "s")"
+        let horizonEnd = calendar.date(
+            byAdding: .day,
+            value: horizonDays + 1,
+            to: calendar.startOfDay(for: now)
+        )
 
         var buckets: [String: [PlanTask]] = [
-            "Overdue": [], "Today": [], "Next 7 Days": [], "Later": [], "No Date": [],
+            "Overdue": [], "Today": [], nextBucket: [], "Later": [], "No Date": [],
         ]
         for task in grouped {
             if task.isOverdue(now: now, calendar: calendar) {
@@ -43,8 +50,8 @@ struct TasksView: View {
             } else if let due = task.dueDate {
                 if calendar.isDate(due, inSameDayAs: now) {
                     buckets["Today", default: []].append(task)
-                } else if let horizon = calendar.date(byAdding: .day, value: 7, to: now), due < horizon {
-                    buckets["Next 7 Days", default: []].append(task)
+                } else if let horizonEnd, calendar.startOfDay(for: due) < horizonEnd {
+                    buckets[nextBucket, default: []].append(task)
                 } else {
                     buckets["Later", default: []].append(task)
                 }
@@ -53,7 +60,7 @@ struct TasksView: View {
             }
         }
 
-        let order = ["Overdue", "Today", "Next 7 Days", "Later", "No Date"]
+        let order = ["Overdue", "Today", nextBucket, "Later", "No Date"]
         var result = order.compactMap { title -> TaskSection? in
             guard let tasks = buckets[title], !tasks.isEmpty else { return nil }
             return TaskSection(title: title, tasks: manualOrder(tasks))
