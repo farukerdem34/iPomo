@@ -80,6 +80,8 @@ Every settings group implements `decodeIfPresent` defaults plus a `clamp()`. Add
 ## Working conventions
 
 - Keep each change focused; update `docs/` and README when behavior or workflows change.
+- Commit one feature per commit, or one fix per commit — never bundle unrelated changes. Follow the existing `feat:`/`fix:`/`docs:`/`ci:` message style.
+- Be careful with tags: pushing a `v*` tag runs the full macOS build and publishes a GitHub Release (`.github/workflows/ci.yml`). Only push a tag when cutting a release, on the intended commit.
 - Any new mutation should go through `AppModel.mutate` and therefore be persisted automatically; never write the store directly from a view.
 - Respect read-only mode (`dataIsReadOnly`) and never silently replace user data — use `backupIfNeeded(force:)` before import/reset.
 - Cross-section drag reordering preserves existing `sortOrder` values; don't renumber globally.
