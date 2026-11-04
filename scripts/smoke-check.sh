@@ -4,6 +4,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+REPORT_DIR="$HOME/Library/Logs/DiagnosticReports"
+MARKER="$(mktemp)"
+trap 'rm -f "$MARKER"' EXIT
+
 "$ROOT/scripts/build-app.sh" release
 
 pkill -x iPomo 2>/dev/null || true
@@ -22,8 +26,9 @@ fi
 sleep 1
 swift "$ROOT/scripts/check-window.swift"
 
-if ls -t "$HOME/Library/Logs/DiagnosticReports" 2>/dev/null | grep -qi '^iPomo'; then
-    echo "FAIL: a iPomo crash report exists" >&2
+CRASH_REPORT="$(find "$REPORT_DIR" -maxdepth 1 -name 'iPomo*' -newer "$MARKER" -print -quit 2>/dev/null || true)"
+if [[ -n "$CRASH_REPORT" ]]; then
+    echo "FAIL: a new iPomo crash report exists: $CRASH_REPORT" >&2
     exit 1
 fi
 
