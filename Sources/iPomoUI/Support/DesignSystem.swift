@@ -298,6 +298,7 @@ struct SectionHeading: View {
                 Text(detail)
                     .font(Typography.caption(12))
                     .foregroundStyle(DesignTokens.inkTertiary)
+                    .padding(.bottom, DesignTokens.s2)
             }
         }
     }
