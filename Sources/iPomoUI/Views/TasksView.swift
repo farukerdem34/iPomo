@@ -125,13 +125,10 @@ struct TasksView: View {
             header(tasks)
                 .padding(.horizontal, DesignTokens.s5)
                 .padding(.top, DesignTokens.s4)
-            searchRow
-                .padding(.horizontal, DesignTokens.s5)
-                .padding(.top, DesignTokens.s4)
-            filterRow
+            toolbarRow
                 .padding(.horizontal, DesignTokens.s5)
                 .padding(.top, DesignTokens.s3)
-                .padding(.bottom, DesignTokens.s3)
+                .padding(.bottom, DesignTokens.s2)
             Hairline()
 
             if tasks.isEmpty {
@@ -193,14 +190,57 @@ struct TasksView: View {
         }
     }
 
-    private var searchRow: some View {
+    /// Scope tabs, the project filter, and search share one row so the list
+    /// starts a full row higher than a stacked search + filter layout.
+    private var toolbarRow: some View {
+        HStack(alignment: .center, spacing: DesignTokens.s3) {
+            EditorialTabs(
+                items: TaskScope.allCases,
+                title: { $0.title },
+                selection: $model.taskScope,
+                spacing: DesignTokens.s3
+            )
+            Spacer(minLength: DesignTokens.s2)
+            projectMenu
+            searchField
+        }
+    }
+
+    private var projectMenu: some View {
+        Menu {
+            Button("All Projects") { model.taskProjectFilter = nil }
+            Divider()
+            ForEach(model.projects) { project in
+                Button(project.name) { model.taskProjectFilter = project.id }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                if let id = model.taskProjectFilter, let project = model.project(id: id) {
+                    ProjectDot(hex: project.colorHex)
+                    Text(project.name)
+                } else {
+                    Text("All Projects")
+                }
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .semibold))
+            }
+            .font(Typography.bodyMedium(12))
+            .foregroundStyle(DesignTokens.inkSecondary)
+        }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .fixedSize()
+    }
+
+    private var searchField: some View {
         HStack(spacing: DesignTokens.s2) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 12, weight: .medium))
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(DesignTokens.inkTertiary)
-            TextField("Search titles, notes, and projects…", text: $model.taskSearchText)
+            TextField("Search tasks", text: $model.taskSearchText)
                 .textFieldStyle(.plain)
-                .font(Typography.body(14))
+                .font(Typography.body(13))
                 .foregroundStyle(DesignTokens.ink)
                 .focused($searchFocused)
             if !model.taskSearchText.isEmpty {
@@ -208,6 +248,7 @@ struct TasksView: View {
                     model.taskSearchText = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 11))
                         .foregroundStyle(DesignTokens.inkTertiary)
                 }
                 .buttonStyle(.plain)
@@ -217,44 +258,16 @@ struct TasksView: View {
                     .foregroundStyle(DesignTokens.inkTertiary)
             }
         }
-        .padding(.vertical, 9)
-        .overlay(alignment: .bottom) { Hairline() }
-    }
-
-    private var filterRow: some View {
-        HStack(alignment: .center, spacing: DesignTokens.s4) {
-            EditorialTabs(
-                items: TaskScope.allCases,
-                title: { $0.title },
-                selection: $model.taskScope,
-                spacing: DesignTokens.s3
-            )
-            Spacer()
-            Menu {
-                Button("All Projects") { model.taskProjectFilter = nil }
-                Divider()
-                ForEach(model.projects) { project in
-                    Button(project.name) { model.taskProjectFilter = project.id }
-                }
-            } label: {
-                HStack(spacing: 6) {
-                    if let id = model.taskProjectFilter, let project = model.project(id: id) {
-                        ProjectDot(hex: project.colorHex)
-                        Text(project.name)
-                    } else {
-                        Text("All Projects")
-                    }
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 8, weight: .semibold))
-                }
-                .font(Typography.bodyMedium(12))
-                .foregroundStyle(DesignTokens.inkSecondary)
-            }
-            .menuStyle(.button)
-            .buttonStyle(.plain)
-            .menuIndicator(.hidden)
-            .fixedSize()
-        }
+        .padding(.horizontal, DesignTokens.s2)
+        .frame(width: 220, height: 28)
+        .background(
+            RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                .fill(DesignTokens.surface)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                .strokeBorder(DesignTokens.hairline, lineWidth: 1)
+        )
     }
 
     private func taskList(_ tasks: [PlanTask]) -> some View {
@@ -308,8 +321,8 @@ private struct TaskSectionView: View {
                 Spacer()
             }
             .padding(.horizontal, DesignTokens.s5)
-            .padding(.top, DesignTokens.s3)
-            .padding(.bottom, DesignTokens.s2)
+            .padding(.top, DesignTokens.s2)
+            .padding(.bottom, DesignTokens.s1)
             .background(DesignTokens.canvas)
         }
     }
@@ -330,11 +343,11 @@ private struct TaskLedgerRow: View {
                     model.toggleTaskCompletion(id: task.id)
                 }
             } label: {
-                EditorialCheckbox(isOn: task.isCompleted)
+                EditorialCheckbox(isOn: task.isCompleted, hitSize: 28)
             }
             .buttonStyle(.plain)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     Text(task.title)
                         .font(Typography.bodyMedium(15))
@@ -426,7 +439,7 @@ private struct TaskLedgerRow: View {
             .help("Edit task")
         }
         .padding(.horizontal, DesignTokens.s5)
-        .padding(.vertical, 9)
+        .padding(.vertical, 6)
         .background(hovering ? DesignTokens.surfaceMuted.opacity(0.35) : Color.clear)
         .overlay(alignment: .bottom) {
             Hairline()

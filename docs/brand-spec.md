@@ -64,8 +64,9 @@ Use `.system(design: .serif)` rather than bundling fonts. No Inter/Roboto.
 - 8pt grid: 4, 8, 16, 24, 32, 48.
 - Radii: 6 (chips/fields), 8 (buttons/tags), 12 (accent panels), 16 (rare).
 - Hairlines are 1pt; no heavy strokes.
-- Minimum interactive target: 28×28 for icon buttons, 40×40 for checkboxes,
-  44×44 for primary touch targets where practical.
+- Minimum interactive target: 28×28 for icon buttons and checkbox hit areas
+  in dense list rows, 40×40 for standalone checkboxes, 44×44 for primary
+  touch targets where practical.
 
 ## Components
 
@@ -76,8 +77,11 @@ Use `.system(design: .serif)` rather than bundling fonts. No Inter/Roboto.
 - **Timer ring:** 330pt circle, 7pt ring, tick marks, serif countdown, stage overline.
 - **Focus panel:** solid accent/stage color block with white/dark text depending on
   appearance; Start + Skip, progress hairline.
-- **Task row:** 40pt checkbox, serif-free title, project dot, due/priority metadata,
-  estimate numerals; hover reveals edit; flat hairline separators.
+- **Task row:** 20pt checkbox mark (28pt hit area in lists), serif-free title,
+  project dot, due/priority metadata, estimate numerals; hover reveals edit;
+  flat hairline separators. Today's plan rows sit on one 28pt title line with
+  a continuous timeline rail behind the dots; the Tasks page keeps scope
+  tabs, project filter, and search in one toolbar row.
 - **Project row:** project dot, serif name, status tag, progress hairline, stats,
   actions on the right; no card grid.
 - **Report chart:** solid accent bars, hairline grid, small axis captions.
