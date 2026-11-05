@@ -23,7 +23,7 @@ struct EstimateStepper: View {
                 format: .number.precision(.fractionLength(0...1))
             )
             .textFieldStyle(EditorialTextFieldStyle(font: Typography.number(16)))
-            .frame(width: 64)
+            .frame(width: 66)
             .multilineTextAlignment(.center)
             .accessibilityLabel("Estimated pomodoros")
             .onChange(of: value) { _, newValue in

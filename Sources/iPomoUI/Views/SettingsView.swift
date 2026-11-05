@@ -78,7 +78,7 @@ struct SettingsView: View {
                 unitLabel("min")
             }
             SettingsFieldRow(title: "Long break interval", detail: "Focus rounds between long breaks") {
-                stepperValue(model.binding(\.timer.longBreakInterval), range: 1...12, width: 30, label: "Long break interval")
+                stepperValue(model.binding(\.timer.longBreakInterval), range: 1...12, textWidth: 56, label: "Long break interval")
             }
             EditorialToggleRow(title: "Auto-start breaks", isOn: model.binding(\.timer.autoStartBreaks))
             EditorialToggleRow(title: "Auto-start focus rounds", isOn: model.binding(\.timer.autoStartFocus))
@@ -126,7 +126,7 @@ struct SettingsView: View {
                 display: "\(Int(model.database.settings.sound.alarmVolume * 100))%"
             )
             SettingsFieldRow(title: "Repeat alarm") {
-                stepperValue(model.binding(\.sound.alarmRepeatCount), range: 1...10, width: 30, label: "Repeat alarm")
+                stepperValue(model.binding(\.sound.alarmRepeatCount), range: 1...10, textWidth: 56, label: "Repeat alarm")
                 unitLabel("×")
             }
             HStack {
@@ -220,7 +220,7 @@ struct SettingsView: View {
             .disabled(!model.database.settings.notifications.notificationsEnabled
                 || !model.database.settings.notifications.remindersEnabled)
             SettingsFieldRow(title: "Reminder minutes") {
-                stepperValue(model.binding(\.notifications.reminderMinutes), range: 1...120, width: 30, label: "Reminder minutes")
+                stepperValue(model.binding(\.notifications.reminderMinutes), range: 1...120, textWidth: 56, label: "Reminder minutes")
                 unitLabel("min")
             }
             .disabled(!model.database.settings.notifications.notificationsEnabled
@@ -270,17 +270,18 @@ struct SettingsView: View {
     private var planningGroup: some View {
         SettingsGroup(title: "Planning") {
             SettingsFieldRow(title: "Daily focus goal") {
-                stepperValue(model.binding(\.planning.dailyGoalMinutes), range: 0...1_440, step: 15, width: 40, label: "Daily focus goal")
+                stepperValue(model.binding(\.planning.dailyGoalMinutes), range: 0...1_440, step: 15, label: "Daily focus goal")
                 unitLabel("min")
             }
             SettingsFieldRow(title: "Default task estimate") {
                 EstimateStepper(value: model.binding(\.planning.defaultEstimatedPomodoros))
+                unitLabel("pomos")
             }
             SettingsFieldRow(
                 title: "Plan horizon",
                 detail: "Tasks due within this many days fill the Next bucket."
             ) {
-                stepperValue(model.binding(\.planning.planHorizonDays), range: 1...30, width: 30, label: "Plan horizon")
+                stepperValue(model.binding(\.planning.planHorizonDays), range: 1...30, label: "Plan horizon")
                 unitLabel("days")
             }
         }
@@ -389,21 +390,23 @@ struct SettingsView: View {
         Text(text)
             .font(Typography.caption(10))
             .foregroundStyle(DesignTokens.inkTertiary)
-            .frame(width: 28, alignment: .leading)
+            .frame(width: 34, alignment: .leading)
     }
 
+    /// Steppers in one group share the same text width so their minus/plus
+    /// buttons line up in a column across rows.
     private func stepperValue(
         _ binding: Binding<Int>,
         range: ClosedRange<Int>,
         step: Int = 1,
-        width: CGFloat,
+        textWidth: CGFloat = 66,
         label: String
     ) -> some View {
         EditorialIntStepper(
             value: binding,
             range: range,
             step: step,
-            textWidth: max(56, width + 26),
+            textWidth: textWidth,
             label: label
         )
     }
