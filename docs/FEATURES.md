@@ -2,7 +2,7 @@
 
 **A free, ad-free, local-first project planning and focus timer for macOS.**
 
-iPomo is a native SwiftUI app for focus sessions and project planning. It keeps the parts that matter — timer, tasks, projects, search, reports, configuration — and has no remote web content, accounts, premium gates, ads, analytics, or network dependencies.
+iPomo is a native SwiftUI app for focus sessions and project planning. It keeps the parts that matter — timer, tasks, projects, search, reports, configuration — and has no remote web content, accounts, premium gates, ads, analytics, or third-party network dependencies. The only outbound request is the optional GitHub update check.
 
 <p align="center">
   <img src="Resources/AppIcon-1024.png" alt="iPomo icon" width="160">
@@ -57,6 +57,7 @@ iPomo is a native SwiftUI app for focus sessions and project planning. It keeps 
 - Theme color, dark mode while running, 12/24-hour format, week start, menu-bar timer visibility.
 - Notification permission, round-end notifications, reminder mode (`last`/`every`) and minutes.
 - Default report range, daily focus goal, default task estimate, plan horizon.
+- Optional update check against GitHub's latest release, with manual **Check for Updates…**.
 - Data folder reveal, JSON backup export/import, full reset.
 
 ## Requirements
@@ -68,7 +69,7 @@ iPomo is a native SwiftUI app for focus sessions and project planning. It keeps 
 ## Build and run
 
 ```bash
-swift test                       # 51 tests (core, app model, opt-in snapshot)
+swift test                       # run the test suite (core, app model, opt-in snapshots)
 ./scripts/build-app.sh release   # builds dist/iPomo.app
 open dist/iPomo.app
 # or:
@@ -98,7 +99,7 @@ You can also open `Package.swift` in Xcode to run and debug the same targets.
 - Database: `~/Library/Application Support/iPomo/data.json`.
 - Backups: `~/Library/Application Support/iPomo/Backups/` (rolling, up to 7, plus corrupt-file quarantine).
 - The database is human-readable JSON with ISO-8601 dates. It is unencrypted; use FileVault or a protected user account if the machine is shared.
-- **No network requests, accounts, ads, analytics, telemetry, or third-party scripts.**
+- **No accounts, ads, analytics, telemetry, or third-party scripts. The optional GitHub update check is the only network request.**
 - Notifications use the macOS local notification service; they never leave the machine.
 - Import/export uses standard macOS file panels; nothing is uploaded.
 - The current build is not sandboxed. Add App Sandbox entitlements before Mac App Store distribution.
@@ -156,8 +157,8 @@ Sources/iPomoUI/            SwiftUI application library
   Views/                      Dashboard, Timer, Tasks, Projects, Reports, Settings, menu bar
   Support/                    Design system, sound, notifications, formatting
 Sources/iPomoApp/           Executable launcher
-Tests/iPomoCoreTests/       38 core Swift Testing tests
-Tests/iPomoAppTests/        12 app-model tests + 1 opt-in visual snapshot test
+Tests/iPomoCoreTests/       Core Swift Testing suites
+Tests/iPomoAppTests/        App-model and opt-in visual snapshot suites
 docs/                          Features, workflows, architecture, brand spec
 ```
 
@@ -177,6 +178,7 @@ Read [`ARCHITECTURE.md`](ARCHITECTURE.md) for the data model, timer state machin
 - finish-time calculation with breaks and long breaks;
 - report buckets, project totals, streaks, filtered reports, CSV escaping;
 - persistence round-trip, corrupt-file recovery, tolerant settings decoding, schema rejection, rolling backups;
+- version comparison and GitHub release parsing, including URL trust validation;
 - app-model flows: task persistence across reloads, round completion and task credit, long-break scheduling, auto-check, fractional credit, skip-as-completion for focus and breaks, partial-session recording, manual entries, and project deletion semantics;
 - the opt-in visual snapshot suite renders every screen in light, Today/Timer/Settings in dark, a wide-window dashboard, the sidebar, the editors, the manual-entry sheet, and the menu-bar panel through an offscreen `NSHostingView`.
 

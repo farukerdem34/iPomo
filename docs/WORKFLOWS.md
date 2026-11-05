@@ -7,7 +7,7 @@ Every user-facing workflow, in the order a new user is likely to encounter it.
 1. Open `iPomo.app`.
 2. A window titled **iPomo** appears with the sidebar: Today, Timer, Tasks, Projects, Reports, Settings.
 3. A menu-bar item appears with the timer text (or “iPomo” while idle).
-4. No account, network, onboarding, or permission prompt is required. The first permission prompt appears only when you start a focus round or enable notifications.
+4. No account or onboarding is required. The optional GitHub update check is the only network request. The first permission prompt appears only when you start a focus round or enable notifications.
 5. The database is created lazily at `~/Library/Application Support/iPomo/data.json` on the first change.
 
 **Expected:** the Today dashboard shows zeroed stats and an empty plan with a quick-add field.
@@ -186,6 +186,15 @@ Open **Settings** from the sidebar, the menu (⌘,), or the account-free app men
 - Reveal the database in Finder.
 - Export/import a JSON backup.
 - Reset all data (confirmation required).
+
+### Updates
+- **Version** shows the installed release (or “Development build” when run from source).
+- **Check for updates automatically** (on by default) asks GitHub at most once a day.
+- **Check Now** performs a manual check; **Download Update** appears when a newer release exists.
+- **iPomo → Check for Updates…** in the app menu also runs a manual check.
+- Manual checks report “up to date” or failures in a banner; automatic checks fail silently.
+- A newer version opens an in-app alert. **Download** opens the release DMG (or the release page when no DMG is attached) and **Release Notes** opens the release page. Install manually by dragging iPomo into Applications; the app never replaces itself.
+- `swift run` builds have no bundle identifier or version, so update checks are disabled.
 
 ## 11. Backup, import, reset
 

@@ -131,6 +131,7 @@ import Testing
         #expect(database.settings.timer.shortBreakMinutes == 5)
         #expect(database.settings.timer.longBreakInterval == 4)
         #expect(database.settings.appearance.theme == .tomato)
+        #expect(database.settings.updates.automaticallyChecksForUpdates)
     }
 
     @Test func unsupportedSchemaIsRejected() throws {

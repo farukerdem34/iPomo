@@ -57,6 +57,7 @@ Nested settings groups:
 | `notifications` | enabled, round end, reminders, reminder mode/minutes |
 | `reports` | default range |
 | `planning` | daily goal minutes, default estimate, plan horizon |
+| `updates` | automatic GitHub release checks (on by default) |
 
 Every nested group implements `decodeIfPresent` defaults. Unknown future keys are
 ignored and missing keys fall back to documented defaults; this keeps older/newer
@@ -127,6 +128,14 @@ sleeping, and relaunching all use the same code path.
 completion, flushes on scene deactivation and app termination, and exposes the file
 path plus import/export/reset actions in Settings.
 
+## Updates
+
+- `UpdateVersion.isNewer(_:than:)` (iPomoCore) compares dotted numeric components, tolerating a leading `v` and `-`/`+` suffixes. A string without a numeric version never compares as newer.
+- `UpdateChecker` (iPomoUI) requests `https://api.github.com/repos/farukerdem34/iPomo/releases/latest` with an ephemeral `URLSession` (no cookies, cache, or credentials), a 15 s timeout, `Accept: application/vnd.github+json`, and an `iPomo/<version>` User-Agent.
+- `parseRelease` reads `tag_name`, `html_url`, and DMG assets. Only HTTPS `github.com/farukerdem34/iPomo/releases/…` URLs are trusted: an untrusted release page rejects the payload, and untrusted assets are ignored.
+- Automatic checks run on first appearance and when the app becomes active, gated to once per 24 h by the `com.ipomo.app.lastUpdateCheck` UserDefaults key (written before the request so failures do not retry on every activation). Users can opt out with `settings.updates.automaticallyChecksForUpdates`.
+- There is no self-installation: the alert's Download button opens the DMG (or the release page when no DMG is attached), and the user installs by dragging iPomo into Applications. Development builds without a bundle identifier or version skip checks.
+
 ## Search
 
 `TaskSearch.search(tasks:query:projects:scope:now:calendar:)`:
@@ -176,7 +185,7 @@ Reports never require an account, network, or premium state.
   - `Window("iPomo", id: "main")` — main NavigationSplitView.
   - `MenuBarExtra` — native menu-bar panel.
   - `Settings` — the same settings form as the sidebar.
-- `RootView` owns sheets (task/project editors), the task-switch confirmation, the banner overlay, scene-phase flush, theme tint, and conditional dark mode while running.
+- `RootView` owns sheets (task/project editors), the task-switch confirmation, the update alert, auto-check triggers, the banner overlay, scene-phase flush, theme tint, and conditional dark mode while running.
 - `SidebarView`: Today, Timer, Tasks, Projects, Reports, Settings.
 - Views are intentionally thin: all mutations go through `AppModel` methods; all pure calculations live in core.
 - `AppCommands` provides menu and keyboard access; `TasksView` has a custom search field so ⌘F can focus it.
@@ -202,7 +211,7 @@ Reports never require an account, network, or premium state.
 
 ## Verification
 
-- `swift test` — 51 Swift Testing cases (38 core + 12 app-model + 1 opt-in snapshot).
+- `swift test` — Swift Testing suites for core logic/persistence/reports, app-model flows, and the opt-in snapshot suite.
 - `IPOMO_SNAPSHOT_DIR=… swift test --filter SnapshotTests` — renders every screen in light, Today/Timer/Settings in dark, a wide-window dashboard, the sidebar, the editors, the manual-entry sheet, and the menu-bar panel through an offscreen `NSHostingView`.
 - `swift build` — compiles the app.
 - `./scripts/build-app.sh release` — bundles, lints `Info.plist`, ad-hoc signs.

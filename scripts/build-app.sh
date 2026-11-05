@@ -5,7 +5,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/dist/iPomo.app"
 CONFIG="${1:-release}"
-VERSION="${IPOMO_VERSION:-1.0.0}"
+# Default to the nearest release tag so local builds report their real version
+# to the in-app update check; IPOMO_VERSION still overrides.
+VERSION="${IPOMO_VERSION:-$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null | sed 's/^v//' || true)}"
+VERSION="${VERSION:-1.0.0}"
 BUILD="${IPOMO_BUILD:-1}"
 
 cd "$ROOT"

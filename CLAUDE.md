@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-iPomo is a local-first Pomodoro timer, task/project planner, and focus-reporting macOS app. SwiftUI + AppKit, macOS 14+, Swift 6.1 toolchain. There are **no third-party dependencies, network code, accounts, analytics, or telemetry** — keep it that way. User data is one JSON file at `~/Library/Application Support/iPomo/data.json` with rolling backups beside it.
+iPomo is a local-first Pomodoro timer, task/project planner, and focus-reporting macOS app. SwiftUI + AppKit, macOS 14+, Swift 6.1 toolchain. There are **no third-party dependencies, accounts, analytics, or telemetry**; the only outbound request is the optional GitHub update check in `UpdateChecker` — keep it that way. User data is one JSON file at `~/Library/Application Support/iPomo/data.json` with rolling backups beside it.
 
 ## Commands
 
@@ -14,7 +14,7 @@ swift test --filter PlanningTests                       # one suite
 swift test --filter TimerMathTests/stageDurations       # one test
 IPOMO_SNAPSHOT_DIR=/tmp/ipomo-snapshots swift test --filter SnapshotTests  # opt-in PNG snapshots
 swift build
-swift run iPomo                                         # dev run; notifications are disabled (no bundle ID)
+swift run iPomo                                         # dev run; notifications and update checks are disabled (no bundle ID)
 ./scripts/run-app.sh [debug|release]                    # build bundle and open it
 ./scripts/build-app.sh release                          # dist/iPomo.app (ad-hoc signed)
 IPOMO_ARCHS="arm64 x86_64" IPOMO_VERSION=1.2.3 IPOMO_BUILD=42 ./scripts/build-app.sh release
@@ -57,6 +57,10 @@ Tests use **Swift Testing** (`import Testing`, `@Suite`, `@Test`), not XCTest. `
 `DatabaseStore` returns a `DatabaseLoadOutcome`: `.loaded`, `.fresh`, `.recovered`, `.unsupported`, or `.unreadable`. It writes pretty-printed, sorted-key, ISO-8601 JSON atomically; creates at most one backup per 24 h (keeps 7); moves corrupt files to `Backups/corrupt-*.json`.
 
 **Never overwrite an unsupported or unreadable file.** In those outcomes `AppModel` enters read-only mode and skips saves until the user imports or resets. Import/export use the same `encode`/`decode` path; a newer `schemaVersion` is rejected with an error.
+
+### Updates
+
+`UpdateChecker` (iPomoUI) requests `https://api.github.com/repos/farukerdem34/iPomo/releases/latest` with an ephemeral `URLSession` (no credentials) and parses the tag and DMG assets. Only HTTPS `github.com/farukerdem34/iPomo/releases/` URLs are trusted. `UpdateVersion` (iPomoCore) compares dotted versions. Automatic checks run at most once per 24 h (UserDefaults key `com.ipomo.app.lastUpdateCheck`) and respect `settings.updates.automaticallyChecksForUpdates` (on by default). There is no self-install: Download opens the DMG and the user drags iPomo into Applications.
 
 ### Settings decoding
 

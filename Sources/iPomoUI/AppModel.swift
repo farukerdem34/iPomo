@@ -87,6 +87,8 @@ final class AppModel: ObservableObject {
     @Published var reportRange: ReportRange
     @Published var reportProjectFilter: UUID?
     @Published var searchFocusRequest = 0
+    @Published var updateState: UpdateCheckState = .idle
+    @Published var isUpdateNoticePresented = false
 
     let store: DatabaseStore
     let soundPlayer = SoundPlayer()

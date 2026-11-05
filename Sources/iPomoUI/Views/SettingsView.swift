@@ -317,7 +317,7 @@ struct SettingsView: View {
                 Button("Reset All Data…") { showResetConfirm = true }
                     .buttonStyle(EditorialDangerButtonStyle())
             }
-            Text("iPomo keeps every task, project, session, and setting in a single JSON file on this Mac with rolling backups. No network requests are made.")
+            Text("Your data never leaves this Mac. The optional update check in About is the only network request.")
                 .font(Typography.caption(10))
                 .foregroundStyle(DesignTokens.inkTertiary)
                 .padding(.top, 4)
@@ -326,6 +326,40 @@ struct SettingsView: View {
 
     private var aboutGroup: some View {
         SettingsGroup(title: "About") {
+            HStack {
+                Text("Version")
+                    .font(Typography.bodyMedium(13))
+                    .foregroundStyle(DesignTokens.ink)
+                Spacer()
+                Text(model.appVersion ?? "Development build")
+                    .font(Typography.caption(11))
+                    .foregroundStyle(DesignTokens.inkSecondary)
+                    .textSelection(.enabled)
+            }
+            .padding(.vertical, 6)
+            EditorialToggleRow(
+                title: "Check for updates automatically",
+                detail: "Asks GitHub at most once a day whether a newer release exists.",
+                isOn: model.binding(\.updates.automaticallyChecksForUpdates)
+            )
+            SettingsActionRow {
+                Button("Check Now") {
+                    Task { await model.checkForUpdates() }
+                }
+                .buttonStyle(EditorialSecondaryButtonStyle())
+                .disabled(model.isCheckingForUpdates || model.appVersion == nil)
+                if model.availableUpdate != nil {
+                    Button("Download Update") { model.openAvailableUpdate() }
+                        .buttonStyle(EditorialSecondaryButtonStyle())
+                }
+                Spacer()
+                if !model.updateStatusText.isEmpty {
+                    Text(model.updateStatusText)
+                        .font(Typography.caption(10))
+                        .foregroundStyle(DesignTokens.inkTertiary)
+                        .lineLimit(2)
+                }
+            }
             HStack {
                 Text("Privacy")
                     .font(Typography.bodyMedium(13))
@@ -336,7 +370,7 @@ struct SettingsView: View {
                     .foregroundStyle(DesignTokens.inkSecondary)
             }
             .padding(.vertical, 6)
-            Text("iPomo is a local-first focus timer and planner. All data stays on this Mac.")
+            Text("iPomo is a local-first focus timer and planner. Your data stays on this Mac; the optional update check only asks GitHub for the latest published version.")
                 .font(Typography.caption(10))
                 .foregroundStyle(DesignTokens.inkTertiary)
         }

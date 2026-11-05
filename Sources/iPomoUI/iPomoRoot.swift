@@ -50,6 +50,17 @@ struct AppCommands: Commands {
     @ObservedObject var model: AppModel
 
     var body: some Commands {
+        CommandGroup(after: .appInfo) {
+            Button("Check for Updates…") {
+                Task { await model.checkForUpdates() }
+            }
+        }
+
+        CommandGroup(replacing: .appSettings) {
+            Button("Settings…") { model.selectedSidebar = .settings }
+                .keyboardShortcut(",", modifiers: [.command])
+        }
+
         CommandGroup(replacing: .newItem) {
             Button("New Task…") {
                 model.presentNewTask()

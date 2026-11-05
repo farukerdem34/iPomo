@@ -51,6 +51,16 @@ struct RootView: View {
         } message: {
             Text("The current focus round will be reset for “\(model.pendingSwitch?.taskTitle ?? "the new task")”.")
         }
+        .alert(
+            "Update Available",
+            isPresented: $model.isUpdateNoticePresented
+        ) {
+            Button("Download") { model.openAvailableUpdate() }
+            Button("Release Notes") { model.openUpdateReleasePage() }
+            Button("Later", role: .cancel) {}
+        } message: {
+            Text("iPomo \(model.availableUpdate?.version ?? "update") is available. You are running \(model.appVersion ?? "an older version").")
+        }
         .background(MainWindowMarker().frame(width: 0, height: 0))
         .overlay(alignment: .top) {
             if let banner = model.banner {
@@ -61,8 +71,11 @@ struct RootView: View {
             }
         }
         .animation(Motion.calm(reduceMotion), value: model.banner?.id)
+        .task { await model.checkForUpdatesIfNeeded() }
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase != .active {
+            if newPhase == .active {
+                Task { await model.checkForUpdatesIfNeeded() }
+            } else {
                 model.flush()
             }
         }

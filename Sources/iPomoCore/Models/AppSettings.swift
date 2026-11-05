@@ -255,6 +255,25 @@ public struct PlanningSettings: Codable, Sendable, Equatable {
     }
 }
 
+// MARK: - Updates
+
+public struct UpdateSettings: Codable, Sendable, Equatable {
+    public var automaticallyChecksForUpdates: Bool
+
+    public init(automaticallyChecksForUpdates: Bool = true) {
+        self.automaticallyChecksForUpdates = automaticallyChecksForUpdates
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case automaticallyChecksForUpdates
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        automaticallyChecksForUpdates = try c.decodeIfPresent(Bool.self, forKey: .automaticallyChecksForUpdates) ?? true
+    }
+}
+
 // MARK: - Root settings
 
 public struct AppSettings: Codable, Sendable, Equatable {
@@ -265,6 +284,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var notifications: NotificationSettings
     public var reports: ReportSettings
     public var planning: PlanningSettings
+    public var updates: UpdateSettings
 
     public init(
         timer: TimerSettings = TimerSettings(),
@@ -273,7 +293,8 @@ public struct AppSettings: Codable, Sendable, Equatable {
         appearance: AppearanceSettings = AppearanceSettings(),
         notifications: NotificationSettings = NotificationSettings(),
         reports: ReportSettings = ReportSettings(),
-        planning: PlanningSettings = PlanningSettings()
+        planning: PlanningSettings = PlanningSettings(),
+        updates: UpdateSettings = UpdateSettings()
     ) {
         self.timer = timer
         self.behavior = behavior
@@ -282,10 +303,11 @@ public struct AppSettings: Codable, Sendable, Equatable {
         self.notifications = notifications
         self.reports = reports
         self.planning = planning
+        self.updates = updates
     }
 
     private enum CodingKeys: String, CodingKey {
-        case timer, behavior, sound, appearance, notifications, reports, planning
+        case timer, behavior, sound, appearance, notifications, reports, planning, updates
     }
 
     public init(from decoder: Decoder) throws {
@@ -297,5 +319,6 @@ public struct AppSettings: Codable, Sendable, Equatable {
         notifications = try c.decodeIfPresent(NotificationSettings.self, forKey: .notifications) ?? NotificationSettings()
         reports = try c.decodeIfPresent(ReportSettings.self, forKey: .reports) ?? ReportSettings()
         planning = try c.decodeIfPresent(PlanningSettings.self, forKey: .planning) ?? PlanningSettings()
+        updates = try c.decodeIfPresent(UpdateSettings.self, forKey: .updates) ?? UpdateSettings()
     }
 }
