@@ -334,6 +334,9 @@ struct EditorialEmptyState: View {
 
 struct EditorialCheckbox: View {
     let isOn: Bool
+    /// Hit-area side; the 20pt mark stays centered inside it. Dense list rows
+    /// use a smaller target than the default 40pt.
+    var hitSize: CGFloat = 40
     @Environment(\.editorialAccent) private var accent
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -352,7 +355,7 @@ struct EditorialCheckbox: View {
                 .opacity(isOn ? 1 : 0)
         }
         .frame(width: 20, height: 20)
-        .frame(width: 40, height: 40)
+        .frame(width: hitSize, height: hitSize)
         .contentShape(Rectangle())
         .animation(Motion.calm(reduceMotion, duration: 0.15), value: isOn)
     }

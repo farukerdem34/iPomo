@@ -116,10 +116,12 @@ struct DashboardView: View {
                         DashboardTaskRow(
                             task: row.task,
                             projectedStart: row.start,
+                            isFirst: index == 0,
                             isLast: index == projectedRows.count - 1
                         )
                     }
                 }
+                .padding(.top, DesignTokens.s1)
                 .animation(Motion.calm(reduceMotion, duration: 0.2), value: model.todayPlanTasks.map(\.id))
                 quickAddRow
             }
@@ -300,72 +302,58 @@ private struct DashboardTaskRow: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let task: PlanTask
     let projectedStart: Date
+    let isFirst: Bool
     let isLast: Bool
     @State private var hovering = false
 
-    var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            Text(projectedTime)
-                .font(Typography.caption(11))
-                .monospacedDigit()
-                .foregroundStyle(DesignTokens.inkTertiary)
-                .frame(width: 46, alignment: .trailing)
-                .padding(.top, 7)
+    /// Fixed metrics put the projected time, timeline dot, checkbox, title,
+    /// progress, and actions on one 28pt line: every element on that line is
+    /// at most 28pt tall, so `HStack(alignment: .center)` keeps them aligned
+    /// without per-element offsets. Fonts are fixed-size, so the math holds.
+    private enum Metrics {
+        static let timeColumnWidth: CGFloat = 46
+        static let lineHeight: CGFloat = 28
+        static let dotSize: CGFloat = 6
+        /// Indent that lines the meta row up under the title.
+        static let metaIndent: CGFloat =
+            timeColumnWidth + DesignTokens.s2 + dotSize + DesignTokens.s2
+            + lineHeight + DesignTokens.s2
+        /// x position of the rail connector from the row's leading edge:
+        /// leading padding + time column + spacing + dot radius, minus half of
+        /// the 1pt line. The connector background spans the padded row.
+        static let railLineX: CGFloat =
+            DesignTokens.s2 + timeColumnWidth + DesignTokens.s2 + dotSize / 2 - 0.5
+    }
 
-            VStack(spacing: 0) {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .center, spacing: DesignTokens.s2) {
+                Text(projectedTime)
+                    .font(Typography.caption(11))
+                    .monospacedDigit()
+                    .foregroundStyle(DesignTokens.inkTertiary)
+                    .frame(width: Metrics.timeColumnWidth, alignment: .trailing)
+
                 Circle()
                     .fill(accent)
-                    .frame(width: 6, height: 6)
-                    .padding(.top, 10)
-                if !isLast {
-                    Rectangle()
-                        .fill(DesignTokens.hairline)
-                        .frame(width: 1, height: 24)
-                }
-            }
-            .frame(width: 20)
+                    .frame(width: Metrics.dotSize, height: Metrics.dotSize)
 
-            HStack(alignment: .top, spacing: DesignTokens.s2) {
                 Button {
                     withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
                         model.toggleTaskCompletion(id: task.id)
                     }
                 } label: {
-                    EditorialCheckbox(isOn: task.isCompleted)
+                    EditorialCheckbox(isOn: task.isCompleted, hitSize: Metrics.lineHeight)
                 }
                 .buttonStyle(.plain)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(task.title)
-                        .font(Typography.bodyMedium(15))
-                        .foregroundStyle(task.isCompleted ? DesignTokens.inkTertiary : DesignTokens.ink)
-                        .strikethrough(task.isCompleted)
-                        .lineLimit(2)
-                    HStack(spacing: DesignTokens.s2) {
-                        if let project = model.project(id: task.projectID) {
-                            HStack(spacing: 5) {
-                                ProjectDot(hex: project.colorHex)
-                                Text(project.name)
-                            }
-                            .font(Typography.caption(11))
-                            .foregroundStyle(DesignTokens.inkSecondary)
-                        }
-                        if let due = task.dueDate {
-                            Text(AppFormat.dueLabel(due, now: model.now, calendar: model.calendar))
-                                .font(Typography.caption(11))
-                                .foregroundStyle(
-                                    task.isOverdue(now: model.now, calendar: model.calendar)
-                                        ? DesignTokens.danger
-                                        : DesignTokens.inkTertiary
-                                )
-                        }
-                        if task.priority == .high {
-                            Image(systemName: "exclamationmark")
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(DesignTokens.warning)
-                        }
-                    }
-                }
+                Text(task.title)
+                    .font(Typography.bodyMedium(15))
+                    .foregroundStyle(task.isCompleted ? DesignTokens.inkTertiary : DesignTokens.ink)
+                    .strikethrough(task.isCompleted)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .help(task.title)
 
                 Spacer(minLength: DesignTokens.s2)
 
@@ -373,7 +361,6 @@ private struct DashboardTaskRow: View {
                     .font(Typography.caption(11))
                     .monospacedDigit()
                     .foregroundStyle(DesignTokens.inkTertiary)
-                    .padding(.top, 3)
 
                 Button {
                     withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
@@ -400,16 +387,72 @@ private struct DashboardTaskRow: View {
                 .opacity(hovering ? 1 : 0)
                 .help("Edit task")
             }
-            .padding(.leading, DesignTokens.s2)
-            .padding(.vertical, 6)
-            .padding(.bottom, isLast ? 4 : 10)
+            .frame(height: Metrics.lineHeight)
+
+            if hasMeta {
+                metaRow
+                    .padding(.leading, Metrics.metaIndent)
+            }
         }
+        .padding(.horizontal, DesignTokens.s2)
+        .padding(.bottom, DesignTokens.s2)
+        .background(alignment: .topLeading) { railConnector }
         .background(
             Rectangle().fill(hovering ? DesignTokens.surfaceMuted.opacity(0.4) : Color.clear)
         )
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
         .animation(Motion.calm(reduceMotion, duration: 0.12), value: hovering)
+    }
+
+    /// The timeline rail behind the dots. Each row draws its own segment so
+    /// consecutive rows form one continuous line; the first and last rows stop
+    /// at their dot's center.
+    @ViewBuilder
+    private var railConnector: some View {
+        if !isFirst || !isLast {
+            Rectangle()
+                .fill(DesignTokens.hairline)
+                .frame(width: 1)
+                .frame(height: isLast ? Metrics.lineHeight / 2 : nil)
+                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, isFirst ? Metrics.lineHeight / 2 : 0)
+                .padding(.leading, Metrics.railLineX)
+        }
+    }
+
+    private var hasMeta: Bool {
+        model.project(id: task.projectID) != nil
+            || task.dueDate != nil
+            || task.priority == .high
+    }
+
+    @ViewBuilder
+    private var metaRow: some View {
+        HStack(spacing: DesignTokens.s2) {
+            if let project = model.project(id: task.projectID) {
+                HStack(spacing: 5) {
+                    ProjectDot(hex: project.colorHex)
+                    Text(project.name)
+                }
+                .font(Typography.caption(11))
+                .foregroundStyle(DesignTokens.inkSecondary)
+            }
+            if let due = task.dueDate {
+                Text(AppFormat.dueLabel(due, now: model.now, calendar: model.calendar))
+                    .font(Typography.caption(11))
+                    .foregroundStyle(
+                        task.isOverdue(now: model.now, calendar: model.calendar)
+                            ? DesignTokens.danger
+                            : DesignTokens.inkTertiary
+                    )
+            }
+            if task.priority == .high {
+                Image(systemName: "exclamationmark")
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundStyle(DesignTokens.warning)
+            }
+        }
     }
 
     private var projectedTime: String {
