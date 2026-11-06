@@ -287,13 +287,22 @@ final class PaperNSTextView: NSTextView {
         let ns = string as NSString
         let selected = range.length > 0 ? ns.substring(with: range) : ""
         let linkText = selected.isEmpty ? "text" : selected
-        let template = "[\(linkText)](url)"
+        // Prefer a URL sitting on the pasteboard as the link target.
+        let clipboard = NSPasteboard.general.string(forType: .string) ?? ""
+        let trimmed = clipboard.trimmingCharacters(in: .whitespacesAndNewlines)
+        let url = (trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://")) ? trimmed : "url"
+        let template = "[\(linkText)](\(url))"
         insertText(template, replacementRange: range)
-        // Select "url" so it can be typed over.
-        // template = "[" + linkText + "]" + "(" + "url" + ")"
-        let prefixLength = 1 + linkText.count + 1 + 1 // [ text ] (
-        let urlRange = NSRange(location: range.location + prefixLength, length: 3)
-        setSelectedRange(urlRange)
+        if url == "url" {
+            // Select "url" so it can be typed over.
+            let prefixLength = 1 + linkText.count + 1 + 1 // [ text ] (
+            let urlRange = NSRange(location: range.location + prefixLength, length: 3)
+            setSelectedRange(urlRange)
+        } else {
+            // Leave the caret after the closing parenthesis.
+            let caret = range.location + template.count
+            setSelectedRange(NSRange(location: caret, length: 0))
+        }
     }
 
     private func wrapSelection(prefix: String, suffix: String) {
