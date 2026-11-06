@@ -29,7 +29,7 @@ Every user-facing workflow, in the order a new user is likely to encounter it.
 1. Click **Add Task** on Today or Tasks, or press ⌘N.
 2. Enter:
    - **Title** (required).
-   - **Notes** (plain text; no HTML rendering).
+   - **Notes** (Markdown supported; use **Preview** to check the formatted note).
    - **Project** (No Project or any existing project).
    - **Estimated pomodoros** (0.1–99; estimates below 1 shorten the focus round).
    - **Priority** (Low / Medium / High).

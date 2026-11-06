@@ -1,6 +1,6 @@
 # Verification record
 
-Recorded on 2026-11-04 on macOS 15.7.9 (arm64) with Swift 6.1.2 and the macOS 15.5
+Recorded on 2026-11-06 on macOS 15.7.9 (arm64) with Swift 6.1.2 and the macOS 15.5
 Command Line Tools SDK. This is a development verification record, not a claim of
 exhaustive UI testing.
 
@@ -9,36 +9,40 @@ exhaustive UI testing.
 ```
 $ swift test
 ...
-✔ Test run with 51 tests passed after 0.011 seconds.
+✔ Test run with 74 tests passed after 0.011 seconds.
 ```
 
 Coverage:
 
-- **iPomoCoreTests (38):** search semantics and regressions, timer math, long-break
+- **iPomoCoreTests (41):** search semantics and regressions, timer math, long-break
   scheduling, fractional estimates, round-aware finish estimates, report buckets/projects/
   streaks/CSV (including formula prefixes), JSON persistence (including legacy archive-flag
   tolerance), corrupt-file recovery, newer-schema preservation, tolerant settings decoding,
   schema rejection, backups, and import-value clamping.
-- **iPomoAppTests (13):** task persistence across reloads, focus completion and task
+- **iPomoAppTests (33):** task persistence across reloads, focus completion and task
   credit, long-break transition, auto-check clearing, fractional credit, skip-as-
   completion for focus and breaks, partial session on reset, manual report entries,
-  project deletion with/without tasks, overdue-timer restore, and one opt-in visual
-  snapshot case.
+  project deletion with/without tasks, overdue-timer restore, Markdown parsing (headings,
+  paragraphs, soft breaks, nested and task lists, code blocks, quotes, thematic breaks,
+  tables, inline emphasis/links, malformed input, and the parse cache), and two opt-in
+  visual snapshot cases.
 
 ## Visual snapshots
 
 ```
 $ IPOMO_SNAPSHOT_DIR=/tmp/ipomo-snapshots swift test --filter SnapshotTests
-✔ Test renderScreens() passed after 3.346 seconds.
+✔ Test renderMarkdownPreview() passed after 4.117 seconds.
+✔ Test renderScreens() passed after 4.117 seconds.
 ```
 
-The snapshot test renders 16 PNGs through an offscreen `NSHostingView` in a borderless
+The snapshot tests render 17 PNGs through an offscreen `NSHostingView` in a borderless
 window: the sidebar, Today, Timer, Tasks, a filtered empty-state Tasks view, Projects,
 Reports, Settings, the task and project editors, the manual-entry sheet, the menu bar,
-a 1600×900 wide-window dashboard, and dark-mode Today, Timer, and Settings. The light,
-dark, and wide runs were reviewed for hierarchy, contrast, alignment, and the custom
-switch/stepper/date/tab/progress components.
+a 1600×900 wide-window dashboard, dark-mode Today, Timer, and Settings, and a dedicated
+Markdown notes sample covering headings, inline formatting, lists, task lists, quotes,
+code blocks, tables, and thematic breaks. The Timer snapshot includes a Markdown note.
 Snapshot rendering is layout verification only; it does not click or type into the UI.
+The regenerated PNGs are available for a human visual pass.
 
 ## Build
 

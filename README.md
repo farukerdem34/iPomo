@@ -18,8 +18,9 @@ iPomo is a local desktop tool:
 
 - **Timer** — focus, short break, and long break rounds with configurable durations,
   auto-start, long-break intervals, fractional estimates, and background-safe state.
-- **Tasks and projects** — priorities, due dates, estimates, notes, drag reordering,
-  and project progress. Global ranked search works across every task.
+- **Tasks and projects** — priorities, due dates, estimates, Markdown notes with an
+  editor preview and formatted timer display, drag reordering, and project progress.
+  Global ranked search works across every task.
 - **Reports** — today, week, month, and year views with focus time, streaks, project
   breakdowns, manual entries, and CSV export.
 - **Menu bar** — a native countdown with start, pause, skip, and stage controls.
