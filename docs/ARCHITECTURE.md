@@ -192,7 +192,8 @@ Reports never require an account, network, or premium state.
 - Sidebar rows are explicit selection buttons (reliable click/keyboard state) rather than a tagged `List` selection.
 - A local `NSEvent` key monitor starts/pauses on Space unless a text control has focus or a sheet/modal is active.
 - The Warm Editorial design system lives in `Support/DesignSystem.swift`: dynamic light/dark tokens, New York serif display type, SF Pro body type, 8pt spacing, environment accent, buttons, fields, ledgers, tabs, and empty states. The full spec is [`brand-spec.md`](brand-spec.md).
-- Screens use flat ledgers, hairlines, and asymmetric compositions instead of card grids. Theme accents flow through `EnvironmentValues.editorialAccent`; each scene injects it from the current theme at the scene root, so sheets presented inside a scene (task and project editors) inherit the chosen accent too.
+- `Support/MarkdownText.swift` parses notes with Foundation's Markdown reader (`PresentationIntent`) into paragraphs, headings, lists, code blocks, quotes, tables, and thematic breaks, then renders them with design tokens. Inline emphasis, code spans, and links keep their Markdown attributes. Parsed documents are cached by source string so the once-per-second timer redraw does not re-parse the note.
+- Screens use flat ledgers, hairlines, and asymmetric compositions instead of card grids. Theme accents flow through `EnvironmentValues.editorialAccent`; the sidebar, Settings scene, and menu-bar panel each inject it from the current theme.
 - Shared controls keep native semantics but use the paper language: `EditorialToggleStyle` (accent track, contrast-aware knob), `EditorialIntStepper` (minus/value/plus), `EditorialDateField` (calendar popover, app hour format), `EditorialTabs` (text-hugging underline), and `EditorialProgressViewStyle` (3–4pt rule). Menus use `.button` style with plain button styling so custom labels render consistently.
 
 ## Notifications and sound

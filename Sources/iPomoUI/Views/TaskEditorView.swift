@@ -8,6 +8,7 @@ struct TaskEditorView: View {
 
     @State private var title: String
     @State private var notes: String
+    @State private var notesPreview = false
     @State private var projectID: UUID?
     @State private var estimatedPomodoros: Double
     @State private var priority: TaskPriority
@@ -43,8 +44,32 @@ struct TaskEditorView: View {
                         .padding(.top, DesignTokens.s2)
 
                     VStack(alignment: .leading, spacing: DesignTokens.s2) {
-                        Overline("Notes")
-                        PaperTextEditor(text: $notes, minHeight: 110)
+                        HStack(spacing: DesignTokens.s2) {
+                            Overline("Notes")
+                            Spacer()
+                            if !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                Button(notesPreview ? "Write" : "Preview") {
+                                    notesPreview.toggle()
+                                }
+                                .buttonStyle(EditorialQuietButtonStyle())
+                                .help(notesPreview ? "Edit the Markdown source" : "Preview the formatted note")
+                            }
+                        }
+                        if notesPreview {
+                            MarkdownText(text: notes, color: DesignTokens.inkSecondary, fontSize: 13)
+                                .padding(10)
+                                .frame(maxWidth: .infinity, minHeight: 110, alignment: .topLeading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                                        .fill(DesignTokens.surface)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                                        .strokeBorder(DesignTokens.hairline, lineWidth: 1)
+                                )
+                        } else {
+                            PaperTextEditor(text: $notes, minHeight: 110)
+                        }
                     }
 
                     HStack(alignment: .top, spacing: DesignTokens.s4) {

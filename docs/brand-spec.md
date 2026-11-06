@@ -91,6 +91,10 @@ Use `.system(design: .serif)` rather than bundling fonts. No Inter/Roboto.
 - **Fields:** paper surface, hairline border, 6–8pt radius. Dates open a graphical
   calendar popover and follow the app's 12/24-hour setting; integers use explicit
   minus/value/plus steppers.
+- **Markdown notes:** headings map to serif section type, body text stays SF Pro,
+  lists keep a hanging marker column, code blocks sit on `surfaceMuted` with a
+  hairline, quotes use a 2pt accent rule, and tables use hairline row dividers.
+  Links inherit the accent tint.
 - **Tabs:** labels spread evenly; only the selected label carries a 2pt accent
   underline, hugging the text rather than the full segment.
 - **Progress:** 3–4pt capsule rules with the accent or project color; no stock
