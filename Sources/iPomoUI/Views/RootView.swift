@@ -22,8 +22,6 @@ struct RootView: View {
         }
         .frame(minWidth: 1_080, minHeight: 680)
         .background(DesignTokens.canvas)
-        .environment(\.editorialAccent, ThemeColors.accent(model.theme))
-        .tint(ThemeColors.accent(model.theme))
         .preferredColorScheme(preferredScheme)
         .sheet(item: $model.pendingTaskEditor) { request in
             TaskEditorView(request: request)

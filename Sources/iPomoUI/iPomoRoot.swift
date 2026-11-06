@@ -9,6 +9,10 @@ public struct iPomoRoot: App {
         Window("iPomo", id: "main") {
             RootView()
                 .environmentObject(model)
+                // Inject the accent above RootView so sheets it presents
+                // (task/project editors) inherit the chosen theme too.
+                .environment(\.editorialAccent, ThemeColors.accent(model.database.settings.appearance.theme))
+                .tint(ThemeColors.accent(model.database.settings.appearance.theme))
         }
         .defaultSize(width: 1_180, height: 760)
         .commands {
