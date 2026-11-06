@@ -262,10 +262,7 @@ struct TimerView: View {
                 }
                 if !task.notes.isEmpty {
                     Hairline()
-                    Text(task.notes)
-                        .font(Typography.body(12))
-                        .foregroundStyle(DesignTokens.inkSecondary)
-                        .lineLimit(4)
+                    MarkdownText(text: task.notes, color: DesignTokens.inkSecondary, fontSize: 12)
                         .padding(.top, 2)
                 }
             } else {

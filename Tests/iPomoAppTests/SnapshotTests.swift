@@ -53,7 +53,15 @@ struct SnapshotTests {
         let tasks = [
             PlanTask(
                 title: "Write the launch note",
-                notes: "Explain the local-first model and the editorial timer.",
+                notes: """
+                **Launch checklist**
+
+                - [x] Draft the note
+                - [ ] Review the onboarding copy
+                - `MARKDOWN.md` is the source of truth
+
+                > Keep the first paragraph quiet and concrete.
+                """,
                 projectID: work.id,
                 estimatedPomodoros: 2,
                 completedPomodoros: 0.5,
@@ -185,6 +193,22 @@ struct SnapshotTests {
         try snap(TasksView(), name: "tasks-empty")
     }
 
+    @Test func renderMarkdownPreview() throws {
+        guard let outputPath = ProcessInfo.processInfo.environment["IPOMO_SNAPSHOT_DIR"] else {
+            return
+        }
+        let output = URL(fileURLWithPath: outputPath, isDirectory: true)
+        try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+
+        try render(
+            MarkdownPreviewSample()
+                .environment(\.editorialAccent, DesignTokens.accent),
+            size: CGSize(width: 520, height: 980),
+            name: "markdown-notes",
+            in: output
+        )
+    }
+
     private func render<V: View>(
         _ view: V,
         size: CGSize,
@@ -224,4 +248,46 @@ struct SnapshotTests {
         try png.write(to: directory.appendingPathComponent("\(name).png"), options: .atomic)
         window.orderOut(nil)
     }
+}
+
+private struct MarkdownPreviewSample: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignTokens.s3) {
+            Overline("Notes")
+            MarkdownText(text: Self.sample, color: DesignTokens.inkSecondary, fontSize: 13)
+        }
+        .padding(DesignTokens.s4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(DesignTokens.canvas)
+    }
+
+    private static let sample = """
+    # Weekly review
+
+    Ship the **Markdown notes** renderer and *verify* it in the timer panel.
+    Inline `code`, ~~struck text~~, and a [link](https://example.com).
+
+    ## Checklist
+
+    - [x] Parse headings, lists, and quotes
+    - [ ] Check tables and code blocks
+      - Nested bullets keep their indent
+
+    1. Draft
+    2. Review
+    3. Ship
+
+    > Notes are local-first: no account, no network, no telemetry.
+
+    ```swift
+    let renderer = MarkdownText(text: note)
+    ```
+
+    | Surface | Status |
+    |:--|--:|
+    | Timer | Ready |
+    | Editor | Preview |
+
+    ---
+    """
 }
