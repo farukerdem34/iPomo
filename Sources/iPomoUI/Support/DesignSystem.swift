@@ -573,28 +573,6 @@ struct EditorialTextFieldStyle: TextFieldStyle {
     }
 }
 
-struct PaperTextEditor: View {
-    @Binding var text: String
-    var minHeight: CGFloat = 96
-
-    var body: some View {
-        TextEditor(text: $text)
-            .font(Typography.body(14))
-            .foregroundStyle(DesignTokens.ink)
-            .scrollContentBackground(.hidden)
-            .padding(8)
-            .frame(minHeight: minHeight)
-            .background(
-                RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
-                    .fill(DesignTokens.surface)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
-                    .strokeBorder(DesignTokens.hairline, lineWidth: 1)
-            )
-    }
-}
-
 struct EditorialDateField: View {
     @Binding var date: Date
     var components: DatePickerComponents = [.date]
