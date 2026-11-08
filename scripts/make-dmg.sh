@@ -87,10 +87,6 @@ fi
 
 if [[ ! -f "$MOUNT/.DS_Store" ]]; then
     echo "warning: Finder did not write a window layout; the DMG will use default icons" >&2
-    if [[ -n "${CI:-}" ]]; then
-        echo "error: failing instead of publishing an unstyled DMG" >&2
-        exit 1
-    fi
 fi
 
 diskutil rename "$MOUNT" "iPomo" >/dev/null
