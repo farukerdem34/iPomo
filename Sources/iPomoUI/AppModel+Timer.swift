@@ -202,6 +202,9 @@ extension AppModel {
     }
 
     func finishCurrentRound(now: Date, allowAlarm: Bool) {
+        guard !isFinishingRound else { return }
+        isFinishingRound = true
+        defer { isFinishingRound = false }
         let snapshot = database.timer
         let task = activeTask
         let duration = TimerMath.durationSeconds(
@@ -244,8 +247,10 @@ extension AppModel {
                     let unit = database.tasks[index].pomodoroUnit
                     database.tasks[index].completedPomodoros += unit
                     database.tasks[index].updatedAt = endedAt
-                    if database.settings.behavior.autoCheckTasks,
-                       database.tasks[index].completedPomodoros + 0.0001 >= database.tasks[index].estimatedPomodoros {
+                    if PlanningLogic.shouldAutoComplete(
+                        task: database.tasks[index],
+                        settings: database.settings.behavior
+                    ) {
                         database.tasks[index].isCompleted = true
                         database.tasks[index].completedAt = endedAt
                         if database.settings.behavior.moveCompletedToBottom {
@@ -385,7 +390,7 @@ extension AppModel {
     /// Called when the user deliberately abandons the round (reset, stage
     /// switch, task switch) so tracked focus time is not lost. Skipping is a
     /// completion shortcut and goes through `finishCurrentRound` instead.
-    private func recordCurrentPartialIfNeeded() {
+    func recordCurrentPartialIfNeeded() {
         guard database.settings.behavior.recordPartialSessions else { return }
         guard database.timer.stage == .focus else { return }
         let consumed = TimerMath.consumedSeconds(snapshot: database.timer, now: Date())

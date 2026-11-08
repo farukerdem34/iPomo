@@ -102,7 +102,7 @@ final class AppModel: ObservableObject {
     private var dataIsReadOnly = false
     private(set) var dataReadOnlyMessage: String?
     private var lastIdleRefresh = Date()
-
+    var isFinishingRound = false
     // MARK: Init
 
     init(store: DatabaseStore = DatabaseStore()) {
@@ -276,6 +276,10 @@ final class AppModel: ObservableObject {
             mutation(&database.settings)
             database.settings.timer.clamp()
             database.settings.sound.clamp()
+            database.settings.notifications.reminderMinutes = min(120, max(1, database.settings.notifications.reminderMinutes))
+            database.settings.planning.dailyGoalMinutes = min(1440, max(0, database.settings.planning.dailyGoalMinutes))
+            database.settings.planning.defaultEstimatedPomodoros = min(99, max(0.1, database.settings.planning.defaultEstimatedPomodoros))
+            database.settings.planning.planHorizonDays = min(30, max(1, database.settings.planning.planHorizonDays))
         }
         if database.settings.sound != previousSound,
            database.timer.isRunning,
@@ -309,7 +313,11 @@ final class AppModel: ObservableObject {
     }
 
     var projects: [Project] {
-        database.projects.sorted { $0.sortOrder < $1.sortOrder }
+        database.projects.sorted {
+            if $0.sortOrder != $1.sortOrder { return $0.sortOrder < $1.sortOrder }
+            if $0.createdAt != $1.createdAt { return $0.createdAt < $1.createdAt }
+            return $0.id.uuidString < $1.id.uuidString
+        }
     }
 
     var activeProjects: [Project] {
@@ -396,6 +404,9 @@ final class AppModel: ObservableObject {
     }
 
     func deleteTask(id: UUID) {
+        if database.timer.activeTaskID == id {
+            recordCurrentPartialIfNeeded()
+        }
         mutate { database in
             database.tasks.removeAll { $0.id == id }
             if database.timer.activeTaskID == id {
@@ -405,6 +416,11 @@ final class AppModel: ObservableObject {
     }
 
     func toggleTaskCompletion(id: UUID) {
+        let wasActive = database.timer.activeTaskID == id
+        let currentlyCompleted = database.task(id: id)?.isCompleted ?? false
+        if wasActive && !currentlyCompleted {
+            recordCurrentPartialIfNeeded()
+        }
         mutate { database in
             guard let index = database.tasks.firstIndex(where: { $0.id == id }) else { return }
             let now = Date()
@@ -414,6 +430,9 @@ final class AppModel: ObservableObject {
                 database.tasks[index].completedAt = now
                 if database.settings.behavior.moveCompletedToBottom {
                     database.tasks[index].sortOrder = (database.tasks.map(\.sortOrder).max() ?? 0) + 1
+                }
+                if database.timer.activeTaskID == id {
+                    database.timer.activeTaskID = nil
                 }
             } else {
                 database.tasks[index].completedAt = nil
@@ -449,6 +468,10 @@ final class AppModel: ObservableObject {
     }
 
     func deleteCompletedTasks() {
+        if let active = database.timer.activeTaskID,
+           database.task(id: active)?.isCompleted == true {
+            recordCurrentPartialIfNeeded()
+        }
         mutate { database in
             let completedIDs = Set(database.tasks.filter(\.isCompleted).map(\.id))
             database.tasks.removeAll { completedIDs.contains($0.id) }
@@ -460,6 +483,9 @@ final class AppModel: ObservableObject {
     }
 
     func deleteAllTasks() {
+        if database.timer.activeTaskID != nil {
+            recordCurrentPartialIfNeeded()
+        }
         mutate { database in
             database.tasks.removeAll()
             database.timer.activeTaskID = nil
@@ -470,13 +496,13 @@ final class AppModel: ObservableObject {
     /// Reorders the visible list while preserving the set of sortOrder values,
     /// so reordering one section cannot collide with tasks in another section.
     func reorderTasks(visibleIDs: [UUID], from source: IndexSet, to destination: Int) {
-        var ordered = visibleIDs.compactMap { database.task(id: $0) }
-        let orders = ordered.map(\.sortOrder).sorted()
-        ordered.move(fromOffsets: source, toOffset: destination)
+        let orders = visibleIDs.compactMap { database.task(id: $0)?.sortOrder }.sorted()
+        var orderedIDs = visibleIDs
+        orderedIDs.move(fromOffsets: source, toOffset: destination)
         mutate { database in
-            for (index, task) in ordered.enumerated() {
+            for (index, id) in orderedIDs.enumerated() {
                 guard index < orders.count else { break }
-                guard let taskIndex = database.tasks.firstIndex(where: { $0.id == task.id }) else { continue }
+                guard let taskIndex = database.tasks.firstIndex(where: { $0.id == id }) else { continue }
                 database.tasks[taskIndex].sortOrder = orders[index]
                 database.tasks[taskIndex].updatedAt = Date()
             }
@@ -514,6 +540,11 @@ final class AppModel: ObservableObject {
     }
 
     func deleteProject(id: UUID, deleteTasks: Bool) {
+        if deleteTasks,
+           let active = database.timer.activeTaskID,
+           database.task(id: active)?.projectID == id {
+            recordCurrentPartialIfNeeded()
+        }
         mutate { database in
             database.projects.removeAll { $0.id == id }
             if deleteTasks {
