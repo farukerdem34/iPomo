@@ -141,7 +141,7 @@ public enum ReportAggregator {
             let key = session.projectID?.uuidString ?? "inbox"
             secondsByKey[key, default: 0] += max(0, session.actualSeconds)
             sessionsByKey[key, default: 0] += 1
-            if let project = projectIndex[session.projectID ?? UUID()] {
+            if let projectID = session.projectID, let project = projectIndex[projectID] {
                 nameByKey[key] = project.name
             } else {
                 nameByKey[key] = session.projectName.isEmpty ? "No Project" : session.projectName

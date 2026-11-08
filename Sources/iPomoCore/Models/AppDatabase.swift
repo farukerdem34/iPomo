@@ -56,7 +56,7 @@ public struct AppDatabase: Codable, Sendable {
     // MARK: - Lookups
 
     public var projectByID: [UUID: Project] {
-        Dictionary(uniqueKeysWithValues: projects.map { ($0.id, $0) })
+        Dictionary(projects.map { ($0.id, $0) }, uniquingKeysWith: { _, new in new })
     }
 
     public func project(id: UUID?) -> Project? {
@@ -71,7 +71,11 @@ public struct AppDatabase: Codable, Sendable {
 
     public var activeProjects: [Project] {
         projects.filter { $0.status == .active || $0.status == .onHold }
-            .sorted { $0.sortOrder < $1.sortOrder }
+            .sorted {
+                if $0.sortOrder != $1.sortOrder { return $0.sortOrder < $1.sortOrder }
+                if $0.createdAt != $1.createdAt { return $0.createdAt < $1.createdAt }
+                return $0.id.uuidString < $1.id.uuidString
+            }
     }
 
     public var activeTasks: [PlanTask] {
@@ -92,7 +96,7 @@ public struct AppDatabase: Codable, Sendable {
                 projects[index].id = UUID()
             }
             seenProjectIDs.insert(projects[index].id)
-            projects[index].sortOrder = index
+            projects[index].sortOrder = min(Self.maximumSortOrder, max(0, projects[index].sortOrder))
             if let target = projects[index].targetPomodoros {
                 projects[index].targetPomodoros = min(Self.maximumPomodoros, max(0.1, target))
             }

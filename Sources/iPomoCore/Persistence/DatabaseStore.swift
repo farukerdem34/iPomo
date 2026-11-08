@@ -82,6 +82,7 @@ public final class DatabaseStore {
         copy.updatedAt = Date()
         let data = try encode(copy)
         try data.write(to: fileURL, options: .atomic)
+        try? fileManager.setAttributes([.posixPermissions: 0o600], ofItemAtPath: fileURL.path)
     }
 
     // MARK: - Export / import
@@ -124,6 +125,7 @@ public final class DatabaseStore {
         let destination = backupsURL.appendingPathComponent(name)
         do {
             try fileManager.copyItem(at: fileURL, to: destination)
+            try? fileManager.setAttributes([.posixPermissions: 0o600], ofItemAtPath: destination.path)
             pruneBackups(keeping: 7)
         } catch {
             // A failed backup must not block the save.
@@ -179,7 +181,17 @@ public final class DatabaseStore {
     }
 
     private func createDirectoriesIfNeeded() {
-        try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
-        try? fileManager.createDirectory(at: backupsURL, withIntermediateDirectories: true)
+        try? fileManager.createDirectory(
+            at: directoryURL,
+            withIntermediateDirectories: true,
+            attributes: [.posixPermissions: 0o700]
+        )
+        try? fileManager.createDirectory(
+            at: backupsURL,
+            withIntermediateDirectories: true,
+            attributes: [.posixPermissions: 0o700]
+        )
+        try? fileManager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: directoryURL.path)
+        try? fileManager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: backupsURL.path)
     }
 }
