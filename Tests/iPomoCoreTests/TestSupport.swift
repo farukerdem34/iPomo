@@ -49,6 +49,7 @@ enum TestSupport {
 
     static func session(
         task: String,
+        notes: String = "",
         projectID: UUID? = nil,
         project: String = "",
         stage: Stage = .focus,
@@ -59,6 +60,7 @@ enum TestSupport {
     ) -> FocusSession {
         FocusSession(
             taskTitle: task,
+            notes: notes,
             projectID: projectID,
             projectName: project,
             stage: stage,

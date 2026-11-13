@@ -6,6 +6,8 @@ struct ManualSessionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var taskTitle = ""
+    @State private var notes = ""
+    @State private var notesPreview = false
     @State private var projectID: UUID?
     @State private var date = Date()
     @State private var minutes = 25
@@ -37,6 +39,35 @@ struct ManualSessionSheet: View {
                         Overline("Task or description")
                         TextField("Reading, writing, review…", text: $taskTitle)
                             .textFieldStyle(EditorialTextFieldStyle(font: Typography.body(15)))
+                    }
+
+                    VStack(alignment: .leading, spacing: DesignTokens.s2) {
+                        HStack(spacing: DesignTokens.s2) {
+                            Overline("Notes")
+                            Spacer()
+                            if !notes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                Button(notesPreview ? "Write" : "Preview") {
+                                    notesPreview.toggle()
+                                }
+                                .buttonStyle(EditorialQuietButtonStyle())
+                                .help(notesPreview ? "Edit the Markdown source" : "Preview the formatted note")
+                            }
+                        }
+                        if notesPreview {
+                            MarkdownText(text: notes, color: DesignTokens.inkSecondary, fontSize: 13)
+                                .padding(10)
+                                .frame(maxWidth: .infinity, minHeight: 90, alignment: .topLeading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                                        .fill(DesignTokens.surface)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                                        .strokeBorder(DesignTokens.hairline, lineWidth: 1)
+                                )
+                        } else {
+                            PaperTextEditor(text: $notes, minHeight: 90)
+                        }
                     }
 
                     VStack(alignment: .leading, spacing: DesignTokens.s2) {
@@ -86,6 +117,7 @@ struct ManualSessionSheet: View {
                 Button("Add entry") {
                     model.addManualSession(
                         taskTitle: taskTitle,
+                        notes: notes,
                         projectID: projectID,
                         date: date,
                         minutes: minutes

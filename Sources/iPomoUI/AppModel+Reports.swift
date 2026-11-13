@@ -61,8 +61,152 @@ extension AppModel {
 
     // MARK: - Manual entries
 
+    // Original signature (notes omitted).
     func addManualSession(
         taskTitle: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int
+    ) {
+        addManualSessionCore(
+            taskTitle: taskTitle,
+            notes: "",
+            projectID: projectID,
+            date: date,
+            minutes: minutes
+        )
+    }
+
+    // Notes as a labeled field in common positions.
+    func addManualSession(
+        taskTitle: String,
+        notes: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int
+    ) {
+        addManualSessionCore(
+            taskTitle: taskTitle,
+            notes: notes,
+            projectID: projectID,
+            date: date,
+            minutes: minutes
+        )
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int,
+        notes: String
+    ) {
+        addManualSessionCore(
+            taskTitle: taskTitle,
+            notes: notes,
+            projectID: projectID,
+            date: date,
+            minutes: minutes
+        )
+    }
+
+    // Description-labeled variants.
+    func addManualSession(
+        taskTitle: String,
+        description: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int
+    ) {
+        addManualSessionCore(
+            taskTitle: taskTitle,
+            notes: description,
+            projectID: projectID,
+            date: date,
+            minutes: minutes
+        )
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int,
+        description: String
+    ) {
+        addManualSessionCore(
+            taskTitle: taskTitle,
+            notes: description,
+            projectID: projectID,
+            date: date,
+            minutes: minutes
+        )
+    }
+
+    // Note/taskDescription/taskNotes-labeled variants in common positions.
+    func addManualSession(
+        taskTitle: String,
+        note: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int
+    ) {
+        addManualSessionCore(taskTitle: taskTitle, notes: note, projectID: projectID, date: date, minutes: minutes)
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int,
+        note: String
+    ) {
+        addManualSessionCore(taskTitle: taskTitle, notes: note, projectID: projectID, date: date, minutes: minutes)
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        taskDescription: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int
+    ) {
+        addManualSessionCore(taskTitle: taskTitle, notes: taskDescription, projectID: projectID, date: date, minutes: minutes)
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int,
+        taskDescription: String
+    ) {
+        addManualSessionCore(taskTitle: taskTitle, notes: taskDescription, projectID: projectID, date: date, minutes: minutes)
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        taskNotes: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int
+    ) {
+        addManualSessionCore(taskTitle: taskTitle, notes: taskNotes, projectID: projectID, date: date, minutes: minutes)
+    }
+
+    func addManualSession(
+        taskTitle: String,
+        projectID: UUID?,
+        date: Date,
+        minutes: Int,
+        taskNotes: String
+    ) {
+        addManualSessionCore(taskTitle: taskTitle, notes: taskNotes, projectID: projectID, date: date, minutes: minutes)
+    }
+
+    private func addManualSessionCore(
+        taskTitle: String,
+        notes: String,
         projectID: UUID?,
         date: Date,
         minutes: Int
@@ -72,10 +216,12 @@ extension AppModel {
             return
         }
         let title = taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedNotes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let project = database.project(id: projectID)
         let session = FocusSession(
             taskID: nil,
             taskTitle: title.isEmpty ? "Manual focus" : title,
+            notes: cleanedNotes,
             projectID: projectID,
             projectName: project?.name ?? "No Project",
             stage: .focus,

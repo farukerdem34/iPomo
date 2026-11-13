@@ -134,7 +134,7 @@ When the countdown reaches zero:
 7. The session table lists date, task, project, minutes, and badges for **Manual** and **Partial** entries.
 8. Delete a session with the trash button (confirmation).
 9. Add a correction or offline entry with **Add Entry**:
-   - task/description, project, date/time (calendar popover; time follows the 12/24-hour setting), minutes;
+   - task/description, notes (Markdown), project, date/time (calendar popover; time follows the 12/24-hour setting), minutes;
    - manual entries count in reports and CSV but do not change task pomodoro counts.
 10. **Export CSV** (⇧⌘E) writes a UTF-8 BOM CSV with date, start, end, task, project, stage, minutes, completed, manual.
 
