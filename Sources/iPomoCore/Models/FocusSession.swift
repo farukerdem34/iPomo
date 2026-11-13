@@ -14,6 +14,7 @@ public struct FocusSession: Identifiable, Hashable, Sendable {
     public var actualSeconds: Int
     public var completed: Bool
     public var isManual: Bool
+    public var creditedPomodoros: Double?
 
     public init(
         id: UUID = UUID(),
@@ -28,7 +29,8 @@ public struct FocusSession: Identifiable, Hashable, Sendable {
         plannedSeconds: Int,
         actualSeconds: Int,
         completed: Bool,
-        isManual: Bool = false
+        isManual: Bool = false,
+        creditedPomodoros: Double? = nil
     ) {
         self.id = id
         self.taskID = taskID
@@ -43,6 +45,7 @@ public struct FocusSession: Identifiable, Hashable, Sendable {
         self.actualSeconds = actualSeconds
         self.completed = completed
         self.isManual = isManual
+        self.creditedPomodoros = creditedPomodoros
     }
 
     public var isFocus: Bool { stage == .focus }
@@ -54,7 +57,7 @@ public struct FocusSession: Identifiable, Hashable, Sendable {
 
 extension FocusSession: Codable {
     private enum CodingKeys: String, CodingKey {
-        case id, taskID, taskTitle, notes, projectID, projectName, stage, startedAt, endedAt, plannedSeconds, actualSeconds, completed, isManual
+        case id, taskID, taskTitle, notes, projectID, projectName, stage, startedAt, endedAt, plannedSeconds, actualSeconds, completed, isManual, creditedPomodoros
     }
 
     public init(from decoder: Decoder) throws {
@@ -72,6 +75,7 @@ extension FocusSession: Codable {
         actualSeconds = try container.decode(Int.self, forKey: .actualSeconds)
         completed = try container.decode(Bool.self, forKey: .completed)
         isManual = try container.decodeIfPresent(Bool.self, forKey: .isManual) ?? false
+        creditedPomodoros = try container.decodeIfPresent(Double.self, forKey: .creditedPomodoros)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -89,5 +93,6 @@ extension FocusSession: Codable {
         try container.encode(actualSeconds, forKey: .actualSeconds)
         try container.encode(completed, forKey: .completed)
         try container.encode(isManual, forKey: .isManual)
+        try container.encodeIfPresent(creditedPomodoros, forKey: .creditedPomodoros)
     }
 }

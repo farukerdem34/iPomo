@@ -11,6 +11,7 @@ struct TaskEditorView: View {
     @State private var notesPreview = false
     @State private var projectID: UUID?
     @State private var estimatedPomodoros: Double
+    @State private var completedPomodoros: Double
     @State private var priority: TaskPriority
     @State private var dueEnabled: Bool
     @State private var dueDate: Date
@@ -24,6 +25,7 @@ struct TaskEditorView: View {
         _notes = State(initialValue: request.task?.notes ?? "")
         _projectID = State(initialValue: request.task?.projectID ?? request.projectID)
         _estimatedPomodoros = State(initialValue: request.task?.estimatedPomodoros ?? 1)
+        _completedPomodoros = State(initialValue: request.task?.completedPomodoros ?? 0)
         _priority = State(initialValue: request.task?.priority ?? .medium)
         _dueEnabled = State(initialValue: request.task?.dueDate != nil)
         _dueDate = State(initialValue: request.task?.dueDate ?? Date())
@@ -128,9 +130,13 @@ struct TaskEditorView: View {
                     if isEditing, let task = request.task {
                         VStack(alignment: .leading, spacing: DesignTokens.s2) {
                             Hairline()
-                            Overline("History")
+                            Overline("Progress")
                             HStack(spacing: DesignTokens.s5) {
-                                historyItem("Completed", PlanTask.numberString(task.completedPomodoros))
+                                VStack(alignment: .leading, spacing: 4) {
+                                    EstimateStepper(value: $completedPomodoros, range: 0...999)
+                                        .accessibilityLabel("Completed pomodoros")
+                                    Overline("Completed")
+                                }
                                 historyItem("Created", AppFormat.shortDate(task.createdAt, calendar: model.calendar))
                                 historyItem("Updated", AppFormat.shortDate(task.updatedAt, calendar: model.calendar))
                             }
@@ -255,6 +261,7 @@ struct TaskEditorView: View {
         task.notes = notes
         task.projectID = projectID
         task.estimatedPomodoros = estimatedPomodoros
+        task.completedPomodoros = completedPomodoros
         task.priority = priority
         task.isFocusToday = focusToday
         task.dueDate = dueEnabled ? dueDate : nil

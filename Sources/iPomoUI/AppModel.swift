@@ -377,6 +377,19 @@ final class AppModel: ObservableObject {
             showBanner("A task needs a title.", kind: .warning)
             return
         }
+        let existing = database.task(id: task.id)
+        let wasActive = database.timer.activeTaskID == task.id
+        let wasCompleted = existing?.isCompleted ?? false
+        var normalized = task
+        normalized.completedPomodoros = min(999, max(0, task.completedPomodoros))
+        let becomesCompletedByToggle = normalized.isCompleted && !wasCompleted
+        let becomesCompletedByPomodoros = !normalized.isCompleted
+            && PlanningLogic.shouldAutoComplete(task: normalized, settings: database.settings.behavior)
+        let becomesCompleted = becomesCompletedByToggle || becomesCompletedByPomodoros
+        if wasActive && becomesCompleted && !wasCompleted {
+            recordCurrentPartialIfNeeded()
+        }
+
         mutate { database in
             var updated = task
             updated.title = trimmed
@@ -384,6 +397,80 @@ final class AppModel: ObservableObject {
             updated.updatedAt = Date()
             if let projectID = updated.projectID, database.project(id: projectID) == nil {
                 updated.projectID = nil
+            }
+            updated.completedPomodoros = min(999, max(0, updated.completedPomodoros))
+
+            // Keep reports/statistics in sync when the completed-pomodoro count is
+            // edited manually: add or remove focus sessions for the difference.
+            if let existingIndex = database.tasks.firstIndex(where: { $0.id == updated.id }) {
+                let oldCount = database.tasks[existingIndex].completedPomodoros
+                let newCount = updated.completedPomodoros
+                let delta = newCount - oldCount
+                if delta > 0 {
+                    let project = database.project(id: updated.projectID)
+                    let projectName = project?.name ?? (updated.projectID == nil ? "No Project" : "Deleted Project")
+                    let focusMinutes = max(1, database.settings.timer.focusMinutes)
+                    let seconds = max(1, Int((Double(focusMinutes * 60) * delta).rounded()))
+                    let now = Date()
+                    let session = FocusSession(
+                        taskID: updated.id,
+                        taskTitle: updated.title,
+                        projectID: updated.projectID,
+                        projectName: projectName,
+                        stage: .focus,
+                        startedAt: now.addingTimeInterval(-TimeInterval(seconds)),
+                        endedAt: now,
+                        plannedSeconds: seconds,
+                        actualSeconds: seconds,
+                        completed: true,
+                        isManual: true,
+                        creditedPomodoros: delta
+                    )
+                    database.sessions.append(session)
+                } else if delta < 0 {
+                    let target = -delta
+                    var remaining = target
+                    let taskSessions = database.sessions
+                        .filter { $0.taskID == updated.id && $0.isFocus && $0.completed }
+                        .sorted { $0.endedAt > $1.endedAt }
+                    for session in taskSessions {
+                        guard remaining > 0.0001 else { break }
+                        let credit = session.creditedPomodoros ?? updated.pomodoroUnit
+                        guard credit > 0 else { continue }
+                        if let index = database.sessions.firstIndex(where: { $0.id == session.id }) {
+                            if credit <= remaining + 0.0001 {
+                                database.sessions.remove(at: index)
+                                remaining -= credit
+                            } else {
+                                let ratio = max(0, (credit - remaining) / credit)
+                                database.sessions[index].creditedPomodoros = credit - remaining
+                                let newSeconds = max(0, Int((Double(database.sessions[index].actualSeconds) * ratio).rounded()))
+                                if newSeconds <= 0 {
+                                    database.sessions.remove(at: index)
+                                } else {
+                                    database.sessions[index].actualSeconds = newSeconds
+                                    database.sessions[index].plannedSeconds = newSeconds
+                                }
+                                remaining = 0
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !updated.isCompleted
+                && PlanningLogic.shouldAutoComplete(task: updated, settings: database.settings.behavior) {
+                updated.isCompleted = true
+                updated.completedAt = Date()
+            }
+            if updated.isCompleted && becomesCompleted && updated.completedAt == nil {
+                updated.completedAt = Date()
+            }
+            if updated.isCompleted && becomesCompleted && database.settings.behavior.moveCompletedToBottom {
+                updated.sortOrder = (database.tasks.map(\.sortOrder).max() ?? 0) + 1
+            }
+            if updated.isCompleted && becomesCompleted && database.timer.activeTaskID == updated.id {
+                database.timer.activeTaskID = nil
             }
             if let index = database.tasks.firstIndex(where: { $0.id == updated.id }) {
                 database.tasks[index] = updated

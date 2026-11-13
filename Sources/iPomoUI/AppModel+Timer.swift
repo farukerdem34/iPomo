@@ -435,6 +435,7 @@ extension AppModel {
         } else {
             projectName = "Deleted Project"
         }
+        let credited: Double? = (completed && stage == .focus) ? task?.pomodoroUnit : nil
         return FocusSession(
             taskID: task?.id,
             taskTitle: task?.title ?? "No task",
@@ -446,7 +447,8 @@ extension AppModel {
             plannedSeconds: plannedSeconds,
             actualSeconds: actualSeconds,
             completed: completed,
-            isManual: isManual
+            isManual: isManual,
+            creditedPomodoros: credited
         )
     }
 }

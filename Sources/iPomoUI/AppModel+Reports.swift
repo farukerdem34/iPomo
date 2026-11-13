@@ -239,7 +239,21 @@ extension AppModel {
     }
 
     func deleteSession(id: UUID) {
+        let session = database.sessions.first { $0.id == id }
         mutate { database in
+            if let session,
+               session.isFocus,
+               session.completed,
+               let taskID = session.taskID,
+               let index = database.tasks.firstIndex(where: { $0.id == taskID }) {
+                let credit = session.creditedPomodoros
+                    ?? database.tasks[index].pomodoroUnit
+                database.tasks[index].completedPomodoros = max(
+                    0,
+                    database.tasks[index].completedPomodoros - credit
+                )
+                database.tasks[index].updatedAt = Date()
+            }
             database.sessions.removeAll { $0.id == id }
         }
         showBanner("Focus entry deleted.", kind: .success)

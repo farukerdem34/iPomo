@@ -132,11 +132,12 @@ When the countdown reaches zero:
 5. The chart buckets focus minutes by day (week), week (month), or month (year).
 6. The project breakdown shows focus time, share, and session counts.
 7. The session table lists date, task, project, minutes, and badges for **Manual** and **Partial** entries.
-8. Delete a session with the trash button (confirmation).
+8. Delete a session with the trash button (confirmation). Deleting a completed focus session also removes its credited pomodoro(s) from the linked task.
 9. Add a correction or offline entry with **Add Entry**:
    - task/description, notes (Markdown), project, date/time (calendar popover; time follows the 12/24-hour setting), minutes;
    - manual entries count in reports and CSV but do not change task pomodoro counts.
-10. **Export CSV** (⇧⌘E) writes a UTF-8 BOM CSV with date, start, end, task, project, stage, minutes, completed, manual.
+10. Edit a task to adjust its completed pomodoro count directly when needed.
+11. **Export CSV** (⇧⌘E) writes a UTF-8 BOM CSV with date, start, end, task, project, stage, minutes, completed, manual.
 
 **Design note:** reports are always local and free; no account, network, or premium state is required.
 
