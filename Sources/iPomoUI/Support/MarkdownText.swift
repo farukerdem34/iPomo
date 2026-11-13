@@ -90,7 +90,9 @@ struct MarkdownDocument {
 
     private static let cache: NSCache<NSString, MarkdownCacheEntry> = {
         let cache = NSCache<NSString, MarkdownCacheEntry>()
-        cache.countLimit = 64
+        // Bound the cache so parsed notes (with their AttributedString payloads)
+        // cannot grow unbounded in memory.
+        cache.countLimit = 8
         return cache
     }()
 

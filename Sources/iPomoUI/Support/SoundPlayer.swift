@@ -70,8 +70,10 @@ final class SoundPlayer {
         sound.volume = Float(min(1, max(0, volume)))
         sound.play()
         retainedSounds.append(sound)
-        if retainedSounds.count > 12 {
-            retainedSounds.removeFirst(retainedSounds.count - 12)
+        // Retain only the most recently played sounds so audio buffers do not
+        // accumulate indefinitely (each NSSound holds decoded audio data).
+        if retainedSounds.count > 2 {
+            retainedSounds.removeFirst(retainedSounds.count - 2)
         }
     }
 }

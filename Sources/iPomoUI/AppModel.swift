@@ -202,7 +202,10 @@ final class AppModel: ObservableObject {
 
     private func startTicker() {
         let timer = DispatchSource.makeTimerSource(queue: .main)
-        timer.schedule(deadline: .now() + 0.25, repeating: 0.5, leeway: .milliseconds(100))
+        // Tick only as often as needed: fast while a round runs (for the
+        // countdown), slow otherwise (idle refresh). This avoids waking the
+        // main thread twice a second for the whole lifetime of the app.
+        timer.schedule(deadline: .now() + 0.5, repeating: 1.0, leeway: .milliseconds(250))
         timer.setEventHandler { [weak self] in
             Task { @MainActor in
                 self?.tick()
