@@ -3,10 +3,12 @@ import SwiftUI
 
 struct RootView: View {
     @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        let _ = themeManager.revision
         NavigationSplitView {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: 220, ideal: DesignTokens.sidebarWidth, max: 264)

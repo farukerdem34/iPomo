@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.editorialAccent) private var accent
     var embedded: Bool = false
     @State private var showResetConfirm = false
@@ -17,6 +18,7 @@ struct SettingsView: View {
     }
 
     var body: some View {
+        let _ = themeManager.revision
         ScrollView {
             VStack(alignment: .leading, spacing: DesignTokens.s4) {
                 PageTitle(
@@ -246,6 +248,7 @@ struct SettingsView: View {
                 RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
                     .strokeBorder(selected ? DesignTokens.ink.opacity(0.5) : DesignTokens.hairline, lineWidth: 1)
             )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -275,6 +278,7 @@ struct SettingsView: View {
                 }
             }
             .padding(.vertical, 4)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

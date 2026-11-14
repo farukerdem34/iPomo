@@ -47,7 +47,6 @@ public struct iPomoRoot: App {
                 // (task/project editors) inherit the chosen theme too.
                 .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
                 .tint(resolvedAccent(model: model, themeManager: themeManager))
-                .id(themeManager.revision)
         }
         .defaultSize(width: 1_180, height: 760)
         .commands {
