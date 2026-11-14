@@ -128,27 +128,69 @@ struct ThemeJSONImportSheet: View {
     }
 
     static let aiPrompt: String = """
-    You are helping me create a theme JSON file for iPomo, a macOS Pomodoro timer app. \
-    Return ONLY a valid JSON object. Do not include markdown fences, comments, or any explanation.
+    You are an expert UI color designer. Create one complete theme for iPomo, a macOS Pomodoro timer app with a calm, paper-like interface. Return ONLY a valid JSON object. Do not include markdown fences, comments, analysis, or any text outside the JSON.
 
-    The JSON must match this schema:
+    OUTPUT SCHEMA (all fields required):
     {
-      "name": "Theme name",
+      "name": "Short, human-readable theme name",
       "light": {
-        "canvas": "#RRGGBB", "sidebar": "#RRGGBB", "surface": "#RRGGBB", "surfaceMuted": "#RRGGBB",
-        "ink": "#RRGGBB", "inkSecondary": "#RRGGBB", "inkTertiary": "#RRGGBB", "hairline": "#RRGGBB",
-        "accent": "#RRGGBB", "onAccent": "#RRGGBB", "switchKnob": "#RRGGBB", "sage": "#RRGGBB",
-        "slate": "#RRGGBB", "success": "#RRGGBB", "warning": "#RRGGBB", "danger": "#RRGGBB"
+        "canvas": "#RRGGBB",
+        "sidebar": "#RRGGBB",
+        "surface": "#RRGGBB",
+        "surfaceMuted": "#RRGGBB",
+        "ink": "#RRGGBB",
+        "inkSecondary": "#RRGGBB",
+        "inkTertiary": "#RRGGBB",
+        "hairline": "#RRGGBB",
+        "accent": "#RRGGBB",
+        "onAccent": "#RRGGBB",
+        "switchKnob": "#RRGGBB",
+        "sage": "#RRGGBB",
+        "slate": "#RRGGBB",
+        "success": "#RRGGBB",
+        "warning": "#RRGGBB",
+        "danger": "#RRGGBB"
       },
-      "dark": { ...same 16 fields... }
+      "dark": { "canvas": "#RRGGBB", "sidebar": "#RRGGBB", "surface": "#RRGGBB", "surfaceMuted": "#RRGGBB", "ink": "#RRGGBB", "inkSecondary": "#RRGGBB", "inkTertiary": "#RRGGBB", "hairline": "#RRGGBB", "accent": "#RRGGBB", "onAccent": "#RRGGBB", "switchKnob": "#RRGGBB", "sage": "#RRGGBB", "slate": "#RRGGBB", "success": "#RRGGBB", "warning": "#RRGGBB", "danger": "#RRGGBB" }
     }
 
-    Guidelines:
-    - Every color must be a 6-digit hex string starting with #.
-    - Light theme: light backgrounds with dark text; dark theme: dark backgrounds with light text.
-    - Accent must be clearly visible on canvas and surface in both variants.
-    - Keep contrast accessible (WCAG AA where practical).
-    - Choose a cohesive aesthetic (for example Catppuccin, Tokyo Night, Rose Pine, Nord, Dracula, Gruvbox, Solarized).
+    FIELD MEANING:
+    - canvas: main page background.
+    - sidebar: navigation sidebar background.
+    - surface: raised inputs, cards, and popovers.
+    - surfaceMuted: hover states, quiet fills, code blocks.
+    - ink: primary text.
+    - inkSecondary: body secondary text.
+    - inkTertiary: metadata, overlines, placeholders.
+    - hairline: 1px rules, borders, dividers.
+    - accent: primary brand color used for focus, selection, primary buttons, links, and the timer ring.
+    - onAccent: text/icon color drawn on top of accent fills.
+    - switchKnob: knob color on an OFF switch.
+    - sage: short-break stage color.
+    - slate: long-break stage color.
+    - success: positive/confirmation color.
+    - warning: caution color.
+    - danger: destructive/error color.
+
+    DESIGN RULES:
+    1. Every color must be exactly a 7-character hex string: # followed by 6 uppercase or lowercase hex digits.
+    2. The light variant must use light backgrounds and dark text; the dark variant must use dark backgrounds and light text.
+    3. Backgrounds should be low-saturation and calm. Avoid pure black (#000000) and pure white (#FFFFFF) unless the aesthetic truly requires them.
+    4. ink on canvas and ink on surface must have at least WCAG AA contrast (4.5:1 for normal text).
+    5. accent on canvas and accent on surface must be clearly visible (at least 3:1).
+    6. onAccent must contrast strongly with accent (at least 4.5:1).
+    7. hairline must be subtle but visible against canvas and surface.
+    8. sage, slate, success, warning, and danger must each be distinguishable from one another and from accent.
+    9. The dark variant should not be a simple inversion; adapt saturation and lightness so it feels native in dark mode.
+    10. Keep the overall palette cohesive and restrained, matching a named aesthetic such as Catppuccin, Tokyo Night, Rose Pine, Nord, Dracula, Gruvbox, or Solarized, or an original aesthetic with a clear mood.
+
+    ACCESSIBILITY CHECKLIST BEFORE FINALIZING:
+    - Text contrast passes.
+    - Accent is identifiable without relying on color alone where possible.
+    - Warning and danger are clearly distinct.
+    - No two adjacent surfaces are identical.
+
+    Return only the JSON object. No prose.
 
     Example:
     \(CustomTheme.sampleJSON)
