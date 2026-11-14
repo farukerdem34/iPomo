@@ -79,7 +79,7 @@ Every settings group implements `decodeIfPresent` defaults plus a `clamp()`. Add
 - `RootView` owns sheets, the task-switch alert, banner overlay, scene-phase flush, and conditional dark mode while running. Sidebar navigation is explicit buttons backed by `SidebarItem`.
 - The "Warm Editorial" design system is `Sources/iPomoUI/Support/DesignSystem.swift`: use `DesignTokens` (8pt grid, dynamic light/dark colors), `Typography`, and the shared editorial controls instead of hardcoded colors/fonts. Spec: `docs/brand-spec.md`.
 - Spacebar start/pause is a local `NSEvent` monitor that only acts on `MainWindowRegistry.window` and bails for text fields, sheets, modals, and controls.
-- `NotificationManager` returns `nil` without `Bundle.main.bundleIdentifier` so `swift run` cannot crash; `SoundPlayer` uses built-in `NSSound` names (no shipped audio assets).
+- `NotificationManager` returns `nil` without `Bundle.main.bundleIdentifier` so `swift run` cannot crash; resolves notification sounds from `NotificationSettings` (system default, staged built-in macOS sounds, or a validated user-selected audio file); `SoundPlayer` uses built-in `NSSound` names (no shipped audio assets).
 
 ## Working conventions
 

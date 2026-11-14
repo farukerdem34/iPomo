@@ -144,6 +144,53 @@ public enum TickingSound: String, Codable, CaseIterable, Identifiable, Sendable 
     }
 }
 
+// MARK: - Notification sound
+
+public enum NotificationSound: String, Codable, CaseIterable, Identifiable, Sendable {
+    case `default`
+    case glass
+    case ping
+    case pop
+    case purr
+    case submarine
+    case funk
+    case tink
+    case hero
+    case custom
+
+    public var id: String { rawValue }
+
+    public var title: String {
+        switch self {
+        case .default: return "System Default"
+        case .glass: return "Bell (Glass)"
+        case .ping: return "Ping"
+        case .pop: return "Pop"
+        case .purr: return "Purr"
+        case .submarine: return "Submarine"
+        case .funk: return "Funk"
+        case .tink: return "Tink"
+        case .hero: return "Hero"
+        case .custom: return "Custom File…"
+        }
+    }
+
+    /// Name of the built-in macOS system sound, if this case maps to one.
+    public var systemSoundName: String? {
+        switch self {
+        case .default, .custom: return nil
+        case .glass: return "Glass"
+        case .ping: return "Ping"
+        case .pop: return "Pop"
+        case .purr: return "Purr"
+        case .submarine: return "Submarine"
+        case .funk: return "Funk"
+        case .tink: return "Tink"
+        case .hero: return "Hero"
+        }
+    }
+}
+
 // MARK: - Formatting
 
 public enum HourFormat: String, Codable, CaseIterable, Identifiable, Sendable {

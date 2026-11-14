@@ -1,5 +1,6 @@
 import iPomoCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
@@ -225,6 +226,40 @@ struct SettingsView: View {
             }
             .disabled(!model.database.settings.notifications.notificationsEnabled
                 || !model.database.settings.notifications.remindersEnabled)
+            SettingsFieldRow(title: "Notification sound") {
+                picker(
+                    model.binding(\.notifications.notificationSound),
+                    options: NotificationSound.allCases,
+                    title: { $0.title },
+                    width: 170
+                )
+            }
+            .disabled(!model.database.settings.notifications.notificationsEnabled)
+            if model.database.settings.notifications.notificationSound == .custom {
+                HStack(spacing: DesignTokens.s2) {
+                    Text(model.database.settings.notifications.customNotificationSoundFileName ?? "No file chosen")
+                        .font(Typography.caption(11))
+                        .foregroundStyle(DesignTokens.inkSecondary)
+                        .lineLimit(1)
+                    Spacer()
+                    Button("Choose sound file…") {
+                        let panel = NSOpenPanel()
+                        panel.title = "Choose Notification Sound"
+                        panel.allowedContentTypes = [.audio]
+                        panel.allowsMultipleSelection = false
+                        guard panel.runModal() == .OK, let url = panel.url else { return }
+                        if let name = model.notifications.importCustomSound(from: url) {
+                            model.updateSettings { $0.notifications.customNotificationSoundFileName = name }
+                            model.showBanner("Notification sound updated.", kind: .success)
+                        } else {
+                            model.showBanner("Could not use that sound file (unsupported format or longer than 30 seconds).", kind: .warning)
+                        }
+                    }
+                    .buttonStyle(EditorialQuietButtonStyle())
+                }
+                .padding(.vertical, 6)
+                .disabled(!model.database.settings.notifications.notificationsEnabled)
+            }
             HStack(spacing: DesignTokens.s2) {
                 Text(model.notifications.authorized ? "Permission granted" : "Permission not granted")
                     .font(Typography.caption(11))
@@ -233,7 +268,11 @@ struct SettingsView: View {
                 Button("Request Permission") { model.notifications.requestAuthorization() }
                     .buttonStyle(EditorialQuietButtonStyle())
                 Button("Test") {
-                    model.notifications.notify(title: "iPomo", body: "Notifications are working.")
+                    model.notifications.notify(
+                        title: "iPomo",
+                        body: "Notifications are working.",
+                        settings: model.database.settings.notifications
+                    )
                     model.showBanner(
                         model.notifications.authorized
                             ? "Test notification sent."

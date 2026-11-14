@@ -54,7 +54,7 @@ Nested settings groups:
 | `behavior` | auto-check, move completed to bottom, confirm task switch, record partial |
 | `sound` | enabled, alarm sound/volume/repeat, focus sound/volume |
 | `appearance` | theme, dark while running, hour format, week start, menu-bar timer |
-| `notifications` | enabled, round end, reminders, reminder mode/minutes |
+| `notifications` | enabled, round end, reminders, reminder mode/minutes, notification sound, custom sound file name |
 | `reports` | default range |
 | `planning` | daily goal minutes, default estimate, plan horizon |
 | `updates` | automatic GitHub release checks (on by default) |
@@ -199,7 +199,7 @@ Reports never require an account, network, or premium state.
 
 ## Notifications and sound
 
-- `NotificationManager` guards on `Bundle.main.bundleIdentifier` so `swift run` cannot crash the notification service; requests authorization on first timer start or from Settings; posts local notifications and schedules/removes reminder IDs with a shared prefix.
+- `NotificationManager` guards on `Bundle.main.bundleIdentifier` so `swift run` cannot crash the notification service; requests authorization on first timer start or from Settings; posts local notifications and schedules/removes reminder IDs with a shared prefix. Notification sounds resolve from `NotificationSettings`: system default, a staged built-in macOS sound, or a user-selected audio file staged into `~/Library/Sounds` (validated, 30 s cap).
 - `SoundPlayer` uses built-in `NSSound` names, keeps strong references, supports volume/repeat, and runs a configurable ticking timer on the main run loop.
 - If notifications are denied, banners and alarms still communicate round completion.
 

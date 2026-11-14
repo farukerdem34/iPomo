@@ -290,7 +290,7 @@ extension AppModel {
         if allowAlarm {
             let notificationSettings = database.settings.notifications
             if notificationSettings.notificationsEnabled, notificationSettings.notifyOnRoundEnd {
-                notifications.notify(title: "iPomo", body: bannerText)
+                notifications.notify(title: "iPomo", body: bannerText, settings: notificationSettings)
             }
             soundPlayer.playAlarm(settings: database.settings.sound)
             if TimerMath.shouldAutoStart(nextStage: next, settings: database.settings.timer) {
@@ -393,7 +393,11 @@ extension AppModel {
                 offset += interval
             }
         }
-        notifications.scheduleReminders(reminders, title: "iPomo reminder")
+        notifications.scheduleReminders(
+            reminders,
+            title: "iPomo reminder",
+            sound: notifications.notificationSound(for: settings)
+        )
     }
 
     private static func reminderText(minutes: Int, stage: String) -> String {

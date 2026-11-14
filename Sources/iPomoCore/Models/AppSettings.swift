@@ -176,23 +176,30 @@ public struct NotificationSettings: Codable, Sendable, Equatable {
     public var remindersEnabled: Bool
     public var reminderMode: ReminderMode
     public var reminderMinutes: Int
+    public var notificationSound: NotificationSound
+    public var customNotificationSoundFileName: String?
 
     public init(
         notificationsEnabled: Bool = true,
         notifyOnRoundEnd: Bool = true,
         remindersEnabled: Bool = false,
         reminderMode: ReminderMode = .last,
-        reminderMinutes: Int = 5
+        reminderMinutes: Int = 5,
+        notificationSound: NotificationSound = .default,
+        customNotificationSoundFileName: String? = nil
     ) {
         self.notificationsEnabled = notificationsEnabled
         self.notifyOnRoundEnd = notifyOnRoundEnd
         self.remindersEnabled = remindersEnabled
         self.reminderMode = reminderMode
         self.reminderMinutes = reminderMinutes
+        self.notificationSound = notificationSound
+        self.customNotificationSoundFileName = customNotificationSoundFileName
     }
 
     private enum CodingKeys: String, CodingKey {
         case notificationsEnabled, notifyOnRoundEnd, remindersEnabled, reminderMode, reminderMinutes
+        case notificationSound, customNotificationSoundFileName
     }
 
     public init(from decoder: Decoder) throws {
@@ -203,6 +210,8 @@ public struct NotificationSettings: Codable, Sendable, Equatable {
         reminderMode = try c.decodeIfPresent(ReminderMode.self, forKey: .reminderMode) ?? .last
         reminderMinutes = try c.decodeIfPresent(Int.self, forKey: .reminderMinutes) ?? 5
         reminderMinutes = min(120, max(1, reminderMinutes))
+        notificationSound = try c.decodeIfPresent(NotificationSound.self, forKey: .notificationSound) ?? .default
+        customNotificationSoundFileName = try c.decodeIfPresent(String.self, forKey: .customNotificationSoundFileName)
     }
 }
 

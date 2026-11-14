@@ -171,6 +171,7 @@ Open **Settings** from the sidebar, the menu (⌘,), or the account-free app men
 ### Notifications
 - Enable notifications.
 - Notify on round end.
+- Notification sound: System Default, a built-in macOS sound, or a custom audio file (Choose sound file…; unsupported formats or files over 30 seconds are rejected).
 - In-round reminders: mode (Last / Every) and minutes.
 - Request permission / Test.
 - If macOS denies permission, in-app banners still work.

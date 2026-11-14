@@ -63,6 +63,7 @@ iPomo is a native SwiftUI app for focus sessions and project planning. It keeps 
 - Alarm sound, volume, repeat count, focus (ticking) sound, volume, previews.
 - Theme color, dark mode while running, 12/24-hour format, week start, menu-bar timer visibility.
 - Notification permission, round-end notifications, reminder mode (`last`/`every`) and minutes.
+- Notification sound: macOS system default, any built-in system sound, or a user-selected audio file (validated, ≤30 s, staged into `~/Library/Sounds`).
 - Default report range, daily focus goal, default task estimate, plan horizon.
 - Optional update check against GitHub's latest release, with manual **Check for Updates…**.
 - Data folder reveal, JSON backup export/import, full reset.
