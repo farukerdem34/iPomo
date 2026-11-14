@@ -91,13 +91,15 @@ struct ThemeJSONImportSheet: View {
     private func copySampleJSON() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(CustomTheme.sampleJSON, forType: .string)
-        model.showBanner("Sample theme JSON copied to clipboard.", kind: .success)
+        statusMessage = "Sample theme JSON copied to clipboard."
+        statusIsError = false
     }
 
     private func copyAIPrompt() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(Self.aiPrompt, forType: .string)
-        model.showBanner("AI prompt copied to clipboard. Paste it into ChatGPT, Claude, DeepSeek, etc.", kind: .info)
+        statusMessage = "AI prompt copied to clipboard. Paste it into ChatGPT, Claude, DeepSeek, etc."
+        statusIsError = false
     }
 
     private func apply() {
