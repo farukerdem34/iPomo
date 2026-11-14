@@ -102,6 +102,7 @@ final class AppModel: ObservableObject {
     private var dataIsReadOnly = false
     private(set) var dataReadOnlyMessage: String?
     private var lastIdleRefresh = Date()
+    var lastCycleResetAt = Date()
     var isFinishingRound = false
     // MARK: Init
 
@@ -215,12 +216,15 @@ final class AppModel: ObservableObject {
         ticker = timer
     }
 
-    private func tick() {
+    func tick() {
         let current = Date()
         if database.timer.isRunning || current.timeIntervalSince(lastIdleRefresh) >= 30 {
             lastIdleRefresh = current
             now = current
         }
+        // Automatically reset the pomodoro cycle after a long continuous run
+        // (6 hours) so the user does not have to reset it manually.
+        resetCycleIfNeeded(now: current)
         checkTimerCompletion()
     }
 

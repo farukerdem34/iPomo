@@ -165,6 +165,7 @@ project and note matches. Tests in `SearchTests.swift` assert each rule.
 - Focus sessions only (`stage == .focus`), optionally filtered by project.
 - Totals: focus seconds, session count, completed tasks, active days, average per active day.
 - Project totals: grouped by `projectID`; deleted projects use the session's snapshot name; share = project seconds / total seconds.
+- Each report bucket also carries `projectSeconds`, the per-project focus seconds for that bucket, so the Reports chart can stack projects instead of filtering by a single project.
 - Streaks: unique focus days; current streak walks back from today (or yesterday if today has none); longest streak scans consecutive days.
 - CSV: `Date,Start,End,Task,Project,Stage,Minutes,Completed,Manual`, quoted/escaped, UTF-8 BOM added by the export path.
 

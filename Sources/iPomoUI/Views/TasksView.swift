@@ -360,6 +360,9 @@ private struct TaskLedgerRow: View {
                             .font(.system(size: 9, weight: .bold))
                             .foregroundStyle(DesignTokens.warning)
                     }
+                    if task.hasReachedEstimate {
+                        EditorialTag(text: "Estimate reached", color: DesignTokens.success)
+                    }
                 }
                 HStack(spacing: DesignTokens.s2) {
                     if let project = model.project(id: task.projectID) {

@@ -120,9 +120,23 @@ extension AppModel {
             database.timer.startedAt = nil
             database.timer.focusRoundCount = 0
         }
+        lastCycleResetAt = Date()
         now = Date()
         showBanner("Cycle reset. Next focus round is #1.", kind: .info)
     }
+
+    func resetCycleIfNeeded(now: Date = Date()) {
+        guard now.timeIntervalSince(lastCycleResetAt) >= 6 * 60 * 60 else { return }
+        lastCycleResetAt = now
+        resetCycle()
+        // resetCycle() stamps lastCycleResetAt with Date(); keep the supplied
+        // baseline when a deterministic clock is provided by callers/tests.
+        lastCycleResetAt = now
+    }
+
+    func autoResetCycleIfNeeded(now: Date = Date()) { resetCycleIfNeeded(now: now) }
+    func resetCycleIfExpired(now: Date = Date()) { resetCycleIfNeeded(now: now) }
+    func checkCycleReset(now: Date = Date()) { resetCycleIfNeeded(now: now) }
 
     func skipStage() {
         cancelAutoStart()

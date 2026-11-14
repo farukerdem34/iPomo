@@ -16,9 +16,15 @@ public struct ReportBucket: Identifiable, Sendable {
     public let start: Date
     public let label: String
     public let seconds: Int
+    /// Focus seconds attributed to each project within this bucket, keyed by
+    /// the project's id string (or "inbox" for sessions without a project).
+    /// Used to render stacked per-project bars in the reports chart.
+    public let projectSeconds: [String: Int]
 
     public var id: Date { start }
     public var minutes: Int { Int((Double(seconds) / 60.0).rounded()) }
+    public var projectBreakdown: [String: Int] { projectSeconds }
+    public var segments: [String: Int] { projectSeconds }
 }
 
 public struct ReportSummary: Sendable {
@@ -111,17 +117,24 @@ public enum ReportAggregator {
         var totals: [Date: Int] = [:]
         for start in starts { totals[start] = 0 }
 
+        var projectTotalsByBucket: [Date: [String: Int]] = [:]
+        for start in starts { projectTotalsByBucket[start] = [:] }
+
         for session in sessions {
             let bucket = range.bucketStart(for: session.endedAt, calendar: calendar)
             guard totals[bucket] != nil else { continue }
-            totals[bucket, default: 0] += max(0, session.actualSeconds)
+            let seconds = max(0, session.actualSeconds)
+            totals[bucket, default: 0] += seconds
+            let key = session.projectID?.uuidString ?? "inbox"
+            projectTotalsByBucket[bucket, default: [:]][key, default: 0] += seconds
         }
 
         return starts.map { start in
             ReportBucket(
                 start: start,
                 label: range.bucketLabel(for: start, calendar: calendar),
-                seconds: totals[start] ?? 0
+                seconds: totals[start] ?? 0,
+                projectSeconds: projectTotalsByBucket[start] ?? [:]
             )
         }
     }

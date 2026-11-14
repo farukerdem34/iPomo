@@ -23,6 +23,16 @@ extension AppModel {
         reportSummary()
     }
 
+    func reportSessions(page: Int = 0, pageSize: Int = 15) -> [FocusSession] {
+        let summary = reportSummary()
+        let sessions = summary.sessions
+        let count = max(1, (sessions.count + pageSize - 1) / pageSize)
+        let safePage = min(max(0, page), count - 1)
+        let start = safePage * pageSize
+        guard start < sessions.count else { return [] }
+        return Array(sessions.dropFirst(start).prefix(pageSize))
+    }
+
     var todayFocusSeconds: Int {
         database.sessions
             .filter(\.isFocus)

@@ -8,6 +8,8 @@ struct ReportsView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showManualEntry = false
     @State private var sessionToDelete: FocusSession?
+    @State private var sessionPage = 0
+    private let sessionPageSize = 15
 
     var body: some View {
         let summary = model.currentReportSummary
@@ -28,6 +30,8 @@ struct ReportsView: View {
         }
         .editorialBackground()
         .navigationTitle("Reports")
+        .onChange(of: model.reportRange) { _, _ in sessionPage = 0 }
+        .onChange(of: model.reportProjectFilter) { _, _ in sessionPage = 0 }
         .sheet(isPresented: $showManualEntry) {
             ManualSessionSheet()
                 .environmentObject(model)
@@ -163,13 +167,24 @@ struct ReportsView: View {
                     action: { showManualEntry = true }
                 )
             } else {
-                Chart(summary.buckets) { bucket in
-                    BarMark(
-                        x: .value("Period", bucket.label),
-                        y: .value("Minutes", bucket.minutes)
-                    )
-                    .foregroundStyle(accent)
-                    .cornerRadius(2)
+                Chart {
+                    ForEach(summary.buckets) { bucket in
+                        ForEach(summary.projectTotals) { project in
+                            let seconds = bucket.projectSeconds[project.id] ?? 0
+                            if seconds > 0 {
+                                BarMark(
+                                    x: .value("Period", bucket.label),
+                                    y: .value("Minutes", Int((Double(seconds) / 60.0).rounded()))
+                                )
+                                .foregroundStyle(by: .value("Project", project.name))
+                                .cornerRadius(2)
+                            }
+                        }
+                    }
+                }
+                .chartForegroundStyleScale { (name: String) in
+                    let total = summary.projectTotals.first { $0.name == name }
+                    return Color(hex: total?.colorHex ?? "#6B7280")
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading) { value in
@@ -248,6 +263,19 @@ struct ReportsView: View {
         }
     }
 
+    private func paginatedSessions(_ summary: ReportSummary) -> [FocusSession] {
+        let sessions = summary.sessions
+        let count = sessionPageCount(summary)
+        let page = min(max(0, sessionPage), max(0, count - 1))
+        let start = page * sessionPageSize
+        guard start < sessions.count else { return [] }
+        return Array(sessions.dropFirst(start).prefix(sessionPageSize))
+    }
+
+    private func sessionPageCount(_ summary: ReportSummary) -> Int {
+        max(1, (summary.sessions.count + sessionPageSize - 1) / sessionPageSize)
+    }
+
     private func sessionSection(_ summary: ReportSummary) -> some View {
         VStack(alignment: .leading, spacing: DesignTokens.s2) {
             HStack(alignment: .firstTextBaseline) {
@@ -276,9 +304,27 @@ struct ReportsView: View {
                 .foregroundStyle(DesignTokens.inkTertiary)
                 .padding(.vertical, 4)
                 Hairline()
-                ForEach(summary.sessions) { session in
+                ForEach(paginatedSessions(summary)) { session in
                     SessionRow(session: session, onDelete: { sessionToDelete = session })
                     Hairline()
+                }
+                if summary.sessions.count > sessionPageSize {
+                    HStack(spacing: DesignTokens.s3) {
+                        Button("Previous") {
+                            sessionPage = max(0, sessionPage - 1)
+                        }
+                        .buttonStyle(EditorialQuietButtonStyle())
+                        .disabled(sessionPage == 0)
+                        Text("Page \\(sessionPage + 1) of \\(sessionPageCount(summary))")
+                            .font(Typography.caption(11))
+                            .foregroundStyle(DesignTokens.inkTertiary)
+                        Button("Next") {
+                            sessionPage = min(sessionPageCount(summary) - 1, sessionPage + 1)
+                        }
+                        .buttonStyle(EditorialQuietButtonStyle())
+                        .disabled(sessionPage >= sessionPageCount(summary) - 1)
+                    }
+                    .padding(.top, DesignTokens.s2)
                 }
             }
         }

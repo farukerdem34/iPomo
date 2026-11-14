@@ -252,6 +252,9 @@ struct TimerView: View {
                     Text("\(task.displayProgress) pomodoros")
                         .font(Typography.caption(11))
                         .foregroundStyle(DesignTokens.inkTertiary)
+                    if task.hasReachedEstimate {
+                        EditorialTag(text: "Estimate reached", color: DesignTokens.success)
+                    }
                     Spacer()
                     Button("Edit") { model.presentEditTask(task) }
                         .buttonStyle(EditorialQuietButtonStyle())

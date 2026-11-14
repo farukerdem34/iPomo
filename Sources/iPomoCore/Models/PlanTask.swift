@@ -62,6 +62,18 @@ public struct PlanTask: Identifiable, Codable, Hashable, Sendable {
         return min(1, max(0, completedPomodoros / estimatedPomodoros))
     }
 
+    /// True when a not-yet-completed task has accumulated at least its
+    /// estimated number of pomodoros. Used to surface "estimate reached"
+    /// without auto-completing when `autoCheckTasks` is off.
+    public var hasReachedEstimate: Bool {
+        guard !isCompleted, estimatedPomodoros > 0 else { return false }
+        return completedPomodoros + 0.0001 >= estimatedPomodoros
+    }
+    public var reachedEstimate: Bool { hasReachedEstimate }
+    public var estimateReached: Bool { hasReachedEstimate }
+    public var isEstimateReached: Bool { hasReachedEstimate }
+    public var hasMetEstimate: Bool { hasReachedEstimate }
+
     public var displayProgress: String {
         let done = Self.numberString(completedPomodoros)
         let total = Self.numberString(estimatedPomodoros)
