@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import iPomoCore
 
@@ -293,6 +294,9 @@ extension AppModel {
                 notifications.notify(title: "iPomo", body: bannerText, settings: notificationSettings)
             }
             soundPlayer.playAlarm(settings: database.settings.sound)
+            // A persistent visual cue that does not depend on audio output or
+            // headphones: bounce the dock icon until the user activates iPomo.
+            NSApplication.shared.requestUserAttention(.criticalRequest)
             if TimerMath.shouldAutoStart(nextStage: next, settings: database.settings.timer) {
                 scheduleAutoStart(nextStage: next)
             }

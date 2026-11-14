@@ -135,6 +135,8 @@ public struct SoundSettings: Codable, Sendable, Equatable {
 
 public struct AppearanceSettings: Codable, Sendable, Equatable {
     public var theme: AppTheme
+    public var customThemes: [CustomTheme]
+    public var selectedCustomThemeID: UUID?
     public var darkModeWhenRunning: Bool
     public var hourFormat: HourFormat
     public var weekStart: WeekStart
@@ -142,12 +144,16 @@ public struct AppearanceSettings: Codable, Sendable, Equatable {
 
     public init(
         theme: AppTheme = .tomato,
+        customThemes: [CustomTheme] = [],
+        selectedCustomThemeID: UUID? = nil,
         darkModeWhenRunning: Bool = false,
         hourFormat: HourFormat = .twelve,
         weekStart: WeekStart = .monday,
         showTimerInMenuBar: Bool = true
     ) {
         self.theme = theme
+        self.customThemes = customThemes
+        self.selectedCustomThemeID = selectedCustomThemeID
         self.darkModeWhenRunning = darkModeWhenRunning
         self.hourFormat = hourFormat
         self.weekStart = weekStart
@@ -155,12 +161,15 @@ public struct AppearanceSettings: Codable, Sendable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case theme, darkModeWhenRunning, hourFormat, weekStart, showTimerInMenuBar
+        case theme, customThemes, selectedCustomThemeID
+        case darkModeWhenRunning, hourFormat, weekStart, showTimerInMenuBar
     }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         theme = try c.decodeIfPresent(AppTheme.self, forKey: .theme) ?? .tomato
+        customThemes = try c.decodeIfPresent([CustomTheme].self, forKey: .customThemes) ?? []
+        selectedCustomThemeID = try c.decodeIfPresent(UUID.self, forKey: .selectedCustomThemeID)
         darkModeWhenRunning = try c.decodeIfPresent(Bool.self, forKey: .darkModeWhenRunning) ?? false
         hourFormat = try c.decodeIfPresent(HourFormat.self, forKey: .hourFormat) ?? .twelve
         weekStart = try c.decodeIfPresent(WeekStart.self, forKey: .weekStart) ?? .monday

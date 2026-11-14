@@ -36,25 +36,24 @@ extension Color {
 }
 
 enum DesignTokens {
-    // Warm paper surfaces
-    static let canvas = Color.dynamic(light: 0xF5F0E7, dark: 0x171411)
-    static let sidebar = Color.dynamic(light: 0xEFE8DC, dark: 0x1D1915)
-    static let surface = Color.dynamic(light: 0xFBF7F0, dark: 0x221E19)
-    static let surfaceMuted = Color.dynamic(light: 0xECE4D7, dark: 0x2B2620)
-    static let ink = Color.dynamic(light: 0x211C17, dark: 0xF1E9DD)
-    static let inkSecondary = Color.dynamic(light: 0x6D6458, dark: 0xB7AB9B)
-    static let inkTertiary = Color.dynamic(light: 0x9B8F7F, dark: 0x8A7E6E)
-    static let hairline = Color.dynamic(light: 0xDCD2C3, dark: 0x3B342C)
+    // Surfaces and inks are resolved from the active theme palette.
+    static var canvas: Color { Color(hex: ThemeManager.shared.currentPalette().canvas) }
+    static var sidebar: Color { Color(hex: ThemeManager.shared.currentPalette().sidebar) }
+    static var surface: Color { Color(hex: ThemeManager.shared.currentPalette().surface) }
+    static var surfaceMuted: Color { Color(hex: ThemeManager.shared.currentPalette().surfaceMuted) }
+    static var ink: Color { Color(hex: ThemeManager.shared.currentPalette().ink) }
+    static var inkSecondary: Color { Color(hex: ThemeManager.shared.currentPalette().inkSecondary) }
+    static var inkTertiary: Color { Color(hex: ThemeManager.shared.currentPalette().inkTertiary) }
+    static var hairline: Color { Color(hex: ThemeManager.shared.currentPalette().hairline) }
 
-    // Terracotta is the default accent; the chosen theme overrides it.
-    static let accent = Color.dynamic(light: 0xB85C43, dark: 0xE08C72)
-    static let onAccent = Color.dynamic(light: 0xFFF9F2, dark: 0x241A15)
-    static let switchKnob = Color.dynamic(light: 0xFFFDF8, dark: 0xF1E9DD)
-    static let sage = Color.dynamic(light: 0x6E7F5E, dark: 0x9CB18A)
-    static let slate = Color.dynamic(light: 0x596A78, dark: 0x8FA9B7)
-    static let success = Color.dynamic(light: 0x5F7A50, dark: 0x9CB18A)
-    static let warning = Color.dynamic(light: 0xA9762F, dark: 0xD8AA63)
-    static let danger = Color.dynamic(light: 0xA8433A, dark: 0xE28B82)
+    static var accent: Color { Color(hex: ThemeManager.shared.currentPalette().accent) }
+    static var onAccent: Color { Color(hex: ThemeManager.shared.currentPalette().onAccent) }
+    static var switchKnob: Color { Color(hex: ThemeManager.shared.currentPalette().switchKnob) }
+    static var sage: Color { Color(hex: ThemeManager.shared.currentPalette().sage) }
+    static var slate: Color { Color(hex: ThemeManager.shared.currentPalette().slate) }
+    static var success: Color { Color(hex: ThemeManager.shared.currentPalette().success) }
+    static var warning: Color { Color(hex: ThemeManager.shared.currentPalette().warning) }
+    static var danger: Color { Color(hex: ThemeManager.shared.currentPalette().danger) }
 
     // 8pt grid
     static let s1: CGFloat = 4

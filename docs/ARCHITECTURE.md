@@ -199,7 +199,7 @@ Reports never require an account, network, or premium state.
 
 ## Notifications and sound
 
-- `NotificationManager` guards on `Bundle.main.bundleIdentifier` so `swift run` cannot crash the notification service; requests authorization on first timer start or from Settings; posts local notifications and schedules/removes reminder IDs with a shared prefix. Notification sounds resolve from `NotificationSettings`: system default, a staged built-in macOS sound, or a user-selected audio file staged into `~/Library/Sounds` (validated, 30 s cap).
+- `NotificationManager` guards on `Bundle.main.bundleIdentifier` so `swift run` cannot crash the notification service; requests authorization on first timer start or from Settings; posts local notifications and schedules/removes reminder IDs with a shared prefix. It also acts as the `UNUserNotificationCenter` delegate so notifications (banner + sound) present while iPomo is frontmost, and marks round-end/reminder notifications as time-sensitive. Notification sounds resolve from `NotificationSettings`: system default, a staged built-in macOS sound, or a user-selected audio file staged into `~/Library/Sounds` (validated, 30 s cap).
 - `SoundPlayer` uses built-in `NSSound` names, keeps strong references, supports volume/repeat, and runs a configurable ticking timer on the main run loop.
 - If notifications are denied, banners and alarms still communicate round completion.
 

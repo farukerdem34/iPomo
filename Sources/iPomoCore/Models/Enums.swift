@@ -257,6 +257,14 @@ public enum AppTheme: String, Codable, CaseIterable, Identifiable, Sendable {
     case teal
     case rose
     case indigo
+    case catppuccin
+    case tokyoNight
+    case rosePine
+    case nord
+    case dracula
+    case gruvbox
+    case solarized
+    case custom
 
     public var id: String { rawValue }
 
@@ -270,6 +278,14 @@ public enum AppTheme: String, Codable, CaseIterable, Identifiable, Sendable {
         case .teal: return "Teal"
         case .rose: return "Rose"
         case .indigo: return "Indigo"
+        case .catppuccin: return "Catppuccin"
+        case .tokyoNight: return "Tokyo Night"
+        case .rosePine: return "Rose Pine"
+        case .nord: return "Nord"
+        case .dracula: return "Dracula"
+        case .gruvbox: return "Gruvbox"
+        case .solarized: return "Solarized"
+        case .custom: return "Custom"
         }
     }
 
@@ -283,6 +299,14 @@ public enum AppTheme: String, Codable, CaseIterable, Identifiable, Sendable {
         case .teal: return "#3F6F6A"
         case .rose: return "#9E5A63"
         case .indigo: return "#4B5670"
+        case .catppuccin: return "#8839EF"
+        case .tokyoNight: return "#34548A"
+        case .rosePine: return "#907AA9"
+        case .nord: return "#5E81AC"
+        case .dracula: return "#BD93F9"
+        case .gruvbox: return "#9D0006"
+        case .solarized: return "#268BD2"
+        case .custom: return "#B85C43"
         }
     }
 
@@ -296,6 +320,118 @@ public enum AppTheme: String, Codable, CaseIterable, Identifiable, Sendable {
         case .teal: return "#86B8B2"
         case .rose: return "#D49AA2"
         case .indigo: return "#94A2C4"
+        case .catppuccin: return "#CBA6F7"
+        case .tokyoNight: return "#7AA2F7"
+        case .rosePine: return "#C4A7E7"
+        case .nord: return "#88C0D0"
+        case .dracula: return "#BD93F9"
+        case .gruvbox: return "#FE8019"
+        case .solarized: return "#268BD2"
+        case .custom: return "#E08C72"
+        }
+    }
+
+    /// Full light palette for this theme.
+    public var lightPalette: ThemePalette {
+        switch self {
+        case .tomato:
+            return .warmEditorialLight
+        case .emerald:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#5F7355"; p.onAccent = "#FFF9F2"
+            return p
+        case .ocean:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#4A6572"; p.onAccent = "#FFF9F2"
+            return p
+        case .violet:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#765D7A"; p.onAccent = "#FFF9F2"
+            return p
+        case .amber:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#A9762F"; p.onAccent = "#FFF9F2"
+            return p
+        case .teal:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#3F6F6A"; p.onAccent = "#FFF9F2"
+            return p
+        case .rose:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#9E5A63"; p.onAccent = "#FFF9F2"
+            return p
+        case .indigo:
+            var p = ThemePalette.warmEditorialLight
+            p.accent = "#4B5670"; p.onAccent = "#FFF9F2"
+            return p
+        case .catppuccin:
+            return .catppuccinLight
+        case .tokyoNight:
+            return .tokyoNightLight
+        case .rosePine:
+            return .rosePineLight
+        case .nord:
+            return .nordLight
+        case .dracula:
+            return .draculaLight
+        case .gruvbox:
+            return .gruvboxLight
+        case .solarized:
+            return .solarizedLight
+        case .custom:
+            return .warmEditorialLight
+        }
+    }
+
+    /// Full dark palette for this theme.
+    public var darkPalette: ThemePalette {
+        switch self {
+        case .tomato:
+            return .warmEditorialDark
+        case .emerald:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#9CB18A"; p.onAccent = "#241A15"
+            return p
+        case .ocean:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#8FA9B7"; p.onAccent = "#241A15"
+            return p
+        case .violet:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#B79BB9"; p.onAccent = "#241A15"
+            return p
+        case .amber:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#D8AA63"; p.onAccent = "#241A15"
+            return p
+        case .teal:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#86B8B2"; p.onAccent = "#241A15"
+            return p
+        case .rose:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#D49AA2"; p.onAccent = "#241A15"
+            return p
+        case .indigo:
+            var p = ThemePalette.warmEditorialDark
+            p.accent = "#94A2C4"; p.onAccent = "#241A15"
+            return p
+        case .catppuccin:
+            return .catppuccinDark
+        case .tokyoNight:
+            return .tokyoNightDark
+        case .rosePine:
+            return .rosePineDark
+        case .nord:
+            return .nordDark
+        case .dracula:
+            return .draculaDark
+        case .gruvbox:
+            return .gruvboxDark
+        case .solarized:
+            return .solarizedDark
+        case .custom:
+            return .warmEditorialDark
         }
     }
 }

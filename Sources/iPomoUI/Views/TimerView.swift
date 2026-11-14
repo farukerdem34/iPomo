@@ -226,10 +226,23 @@ struct TimerView: View {
         VStack(alignment: .leading, spacing: DesignTokens.s2) {
             Overline("Active task")
             if let task = model.activeTask {
-                Text(task.title)
-                    .font(Typography.section(22))
-                    .foregroundStyle(DesignTokens.ink)
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .top, spacing: DesignTokens.s2) {
+                    Button {
+                        withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                            model.toggleTaskCompletion(id: task.id)
+                        }
+                    } label: {
+                        EditorialCheckbox(isOn: task.isCompleted, hitSize: 32)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.top, 2)
+
+                    VStack(alignment: .leading, spacing: DesignTokens.s2) {
+                        Text(task.title)
+                            .font(Typography.section(22))
+                            .strikethrough(task.isCompleted)
+                            .foregroundStyle(task.isCompleted ? DesignTokens.inkTertiary : DesignTokens.ink)
+                            .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: DesignTokens.s2) {
                     if let project = model.project(id: task.projectID) {
                         ProjectDot(hex: project.colorHex)
@@ -268,6 +281,8 @@ struct TimerView: View {
                     MarkdownText(text: task.notes, color: DesignTokens.inkSecondary, fontSize: 12)
                         .padding(.top, 2)
                 }
+                    }
+                }
             } else {
                 Text("No task selected. Choose one above to attach the session to a task.")
                     .font(Typography.body(13))
@@ -298,29 +313,41 @@ struct TimerView: View {
                     .foregroundStyle(DesignTokens.inkTertiary)
             } else {
                 ForEach(Array(upcoming)) { task in
-                    Button {
-                        model.requestTaskSelection(task.id)
-                    } label: {
-                        HStack(spacing: DesignTokens.s2) {
-                            Image(systemName: "play")
-                                .font(.system(size: 9, weight: .semibold))
-                                .foregroundStyle(accent)
-                                .frame(width: 20, height: 20)
-                                .background(Circle().fill(accent.opacity(0.1)))
-                            Text(task.title)
-                                .font(Typography.body(12))
-                                .foregroundStyle(DesignTokens.ink)
-                                .lineLimit(1)
-                            Spacer(minLength: DesignTokens.s1)
-                            Text(task.displayProgress)
-                                .font(Typography.caption(10))
-                                .monospacedDigit()
-                                .foregroundStyle(DesignTokens.inkTertiary)
+                    HStack(spacing: DesignTokens.s2) {
+                        Button {
+                            withAnimation(Motion.calm(reduceMotion, duration: 0.2)) {
+                                model.toggleTaskCompletion(id: task.id)
+                            }
+                        } label: {
+                            EditorialCheckbox(isOn: task.isCompleted, hitSize: 24)
                         }
-                        .padding(.vertical, 3)
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
+
+                        Button {
+                            model.requestTaskSelection(task.id)
+                        } label: {
+                            HStack(spacing: DesignTokens.s2) {
+                                Image(systemName: "play")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundStyle(accent)
+                                    .frame(width: 20, height: 20)
+                                    .background(Circle().fill(accent.opacity(0.1)))
+                                Text(task.title)
+                                    .font(Typography.body(12))
+                                    .strikethrough(task.isCompleted)
+                                    .foregroundStyle(task.isCompleted ? DesignTokens.inkTertiary : DesignTokens.ink)
+                                    .lineLimit(1)
+                                Spacer(minLength: DesignTokens.s1)
+                                Text(task.displayProgress)
+                                    .font(Typography.caption(10))
+                                    .monospacedDigit()
+                                    .foregroundStyle(DesignTokens.inkTertiary)
+                            }
+                            .padding(.vertical, 3)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }

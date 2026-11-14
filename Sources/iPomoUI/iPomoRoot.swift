@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct iPomoRoot: App {
     @StateObject private var model = AppModel()
+    @StateObject private var themeManager = ThemeManager.shared
 
     public init() {}
 
@@ -9,10 +10,44 @@ public struct iPomoRoot: App {
         Window("iPomo", id: "main") {
             RootView()
                 .environmentObject(model)
+                .environmentObject(themeManager)
+                .onAppear {
+                    let appearance = model.database.settings.appearance
+                    themeManager.configure(
+                        theme: appearance.theme,
+                        customThemes: appearance.customThemes,
+                        selectedCustomThemeID: appearance.selectedCustomThemeID
+                    )
+                }
+                .onChange(of: model.database.settings.appearance.theme) { _, _ in
+                    let appearance = model.database.settings.appearance
+                    themeManager.configure(
+                        theme: appearance.theme,
+                        customThemes: appearance.customThemes,
+                        selectedCustomThemeID: appearance.selectedCustomThemeID
+                    )
+                }
+                .onChange(of: model.database.settings.appearance.customThemes) { _, _ in
+                    let appearance = model.database.settings.appearance
+                    themeManager.configure(
+                        theme: appearance.theme,
+                        customThemes: appearance.customThemes,
+                        selectedCustomThemeID: appearance.selectedCustomThemeID
+                    )
+                }
+                .onChange(of: model.database.settings.appearance.selectedCustomThemeID) { _, _ in
+                    let appearance = model.database.settings.appearance
+                    themeManager.configure(
+                        theme: appearance.theme,
+                        customThemes: appearance.customThemes,
+                        selectedCustomThemeID: appearance.selectedCustomThemeID
+                    )
+                }
                 // Inject the accent above RootView so sheets it presents
                 // (task/project editors) inherit the chosen theme too.
-                .environment(\.editorialAccent, ThemeColors.accent(model.database.settings.appearance.theme))
-                .tint(ThemeColors.accent(model.database.settings.appearance.theme))
+                .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
+                .tint(resolvedAccent(model: model, themeManager: themeManager))
+                .id(themeManager.revision)
         }
         .defaultSize(width: 1_180, height: 760)
         .commands {
@@ -22,7 +57,8 @@ public struct iPomoRoot: App {
         MenuBarExtra {
             MenuBarPanel()
                 .environmentObject(model)
-                .environment(\.editorialAccent, ThemeColors.accent(model.database.settings.appearance.theme))
+                .environmentObject(themeManager)
+                .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
         } label: {
             MenuBarLabel()
                 .environmentObject(model)
@@ -32,9 +68,21 @@ public struct iPomoRoot: App {
         Settings {
             SettingsView()
                 .environmentObject(model)
-                .environment(\.editorialAccent, ThemeColors.accent(model.database.settings.appearance.theme))
+                .environmentObject(themeManager)
+                .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
         }
     }
+}
+
+@MainActor
+private func resolvedAccent(model: AppModel, themeManager: ThemeManager) -> Color {
+    let appearance = model.database.settings.appearance
+    if appearance.theme == .custom,
+       let id = appearance.selectedCustomThemeID,
+       let custom = appearance.customThemes.first(where: { $0.id == id }) {
+        return ThemeColors.accent(custom: custom, isDark: NSApp?.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
+    }
+    return ThemeColors.accent(appearance.theme)
 }
 
 private struct MenuBarLabel: View {

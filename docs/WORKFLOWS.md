@@ -235,7 +235,7 @@ iPomo uses conventional macOS platform accelerators.
 
 - **App closed mid-round:** on relaunch, the snapshot is read. If the round already ended, it is completed once at its expected end time; otherwise it resumes with the correct remaining time.
 - **Mac slept mid-round:** the next tick observes the elapsed time and completes or resumes accordingly.
-- **Notifications denied:** in-app banners and alarm sounds still notify you.
+- **Notifications denied:** in-app banners and alarm sounds still notify you. When notifications are allowed, round-end notifications present (banner + sound) even while iPomo is frontmost, and the dock icon bounces until you activate the app.
 - **Database corrupt:** the file is quarantined, a fresh database starts, and the banner points to the backup.
 - **Import fails:** the current database is untouched and a warning banner is shown.
 - **Save fails:** a warning banner appears; the in-memory state remains available until the next save attempt.

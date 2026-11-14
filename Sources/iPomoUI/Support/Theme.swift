@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import iPomoCore
 import SwiftUI
 
@@ -20,6 +21,14 @@ extension Color {
         }
         self.init(red: red, green: green, blue: blue)
     }
+
+    var hexString: String {
+        let nsColor = NSColor(self).usingColorSpace(.sRGB) ?? NSColor(self)
+        let r = Int(round(nsColor.redComponent * 255))
+        let g = Int(round(nsColor.greenComponent * 255))
+        let b = Int(round(nsColor.blueComponent * 255))
+        return String(format: "#%02X%02X%02X", r, g, b)
+    }
 }
 
 enum ThemeColors {
@@ -27,6 +36,56 @@ enum ThemeColors {
         Color.dynamic(lightHex: theme.lightHex, darkHex: theme.darkHex)
     }
 
+    static func accent(custom: CustomTheme, isDark: Bool) -> Color {
+        Color(hex: isDark ? custom.dark.accent : custom.light.accent)
+    }
+}
+
+// MARK: - Theme manager
+
+final class ThemeManager: ObservableObject, @unchecked Sendable {
+    static let shared = ThemeManager()
+
+    @Published private(set) var revision: Int = 0
+
+    nonisolated(unsafe) private var theme: AppTheme = .tomato
+    nonisolated(unsafe) private var customThemes: [CustomTheme] = []
+    nonisolated(unsafe) private var selectedCustomThemeID: UUID?
+
+    private init() {}
+
+    @MainActor
+    func configure(theme: AppTheme, customThemes: [CustomTheme], selectedCustomThemeID: UUID?) {
+        let changed = theme != self.theme
+            || customThemes != self.customThemes
+            || selectedCustomThemeID != self.selectedCustomThemeID
+        self.theme = theme
+        self.customThemes = customThemes
+        self.selectedCustomThemeID = selectedCustomThemeID
+        if changed { revision &+= 1 }
+    }
+
+    private nonisolated var useCustom: Bool { theme == .custom }
+
+    private nonisolated var activePalette: (light: ThemePalette, dark: ThemePalette) {
+        if useCustom, let id = selectedCustomThemeID,
+           let custom = customThemes.first(where: { $0.id == id }) {
+            return (custom.light, custom.dark)
+        }
+        return (theme.lightPalette, theme.darkPalette)
+    }
+
+    nonisolated func palette(for appearance: NSAppearance?) -> ThemePalette {
+        let isDark = appearance?.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        return isDark ? activePalette.dark : activePalette.light
+    }
+
+    nonisolated func currentPalette() -> ThemePalette {
+        palette(for: NSApp?.effectiveAppearance)
+    }
+
+    @MainActor
+    func bump() { revision &+= 1 }
 }
 
 enum AppFormat {

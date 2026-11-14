@@ -18,6 +18,7 @@ iPomo is a native SwiftUI app for focus sessions and project planning. It keeps 
 - **Background-safe state:** a running round is persisted with its start timestamp. After sleep, quit, or relaunch, the app recomputes the remaining time and completes an overdue round exactly once.
 - **Partial-session recording:** resetting, switching stages, or switching tasks records the focus time already spent instead of silently discarding it.
 - Native menu-bar countdown and controls.
+- Tasks can be marked complete directly from the Timer view, including the active task and the up-next list.
 - Local notifications for round endings and optional in-round reminders.
 - Built-in macOS alarm sounds and optional ticking; no bundled audio assets or network calls.
 

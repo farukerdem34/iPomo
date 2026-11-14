@@ -39,8 +39,9 @@ The app should feel intentionally crafted, calm, and legible for long focus sess
 | `warning` | `#A9762F` | `#D8AA63` | Warning |
 | `danger` | `#A8433A` | `#E28B82` | Destructive |
 
-Theme presets are defined in `AppTheme` and map to light/dark accent pairs:
-Tomato, Emerald, Ocean, Violet, Amber, Teal, Rose, Indigo.
+Theme presets are defined in `AppTheme` and map to full light/dark palettes:
+Tomato, Emerald, Ocean, Violet, Amber, Teal, Rose, Indigo, Catppuccin, Tokyo Night,
+Rose Pine, Nord, Dracula, Gruvbox, Solarized, plus user-created custom themes.
 
 Project palette: 12 muted earth tones (terracotta through sage/slate/clay), defined
 in `ProjectPalette`. They are used only for project identity and progress.

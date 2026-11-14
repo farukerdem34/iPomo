@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.editorialAccent) private var accent
     var embedded: Bool = false
     @State private var showResetConfirm = false
+    @State private var isShowingThemeEditor = false
 
     private var importPresented: Binding<Bool> {
         Binding(
@@ -37,6 +38,15 @@ struct SettingsView: View {
             .editorialPagePadding()
         }
         .editorialBackground()
+        .sheet(isPresented: $isShowingThemeEditor) {
+            ThemeEditorSheet { theme in
+                model.updateSettings { settings in
+                    settings.appearance.customThemes.append(theme)
+                    settings.appearance.theme = .custom
+                    settings.appearance.selectedCustomThemeID = theme.id
+                }
+            }
+        }
         .navigationTitle("Settings")
         .frame(
             width: embedded ? nil : 720,
@@ -166,33 +176,34 @@ struct SettingsView: View {
 
     private var appearanceGroup: some View {
         SettingsGroup(title: "Appearance") {
-            HStack(alignment: .center) {
-                Text("Theme color")
+            VStack(alignment: .leading, spacing: DesignTokens.s2) {
+                Text("Theme")
                     .font(Typography.bodyMedium(13))
                     .foregroundStyle(DesignTokens.ink)
-                Spacer()
-                HStack(spacing: 8) {
-                    ForEach(AppTheme.allCases) { theme in
-                        Button {
-                            model.updateSettings { $0.appearance.theme = theme }
-                        } label: {
-                            Circle()
-                                .fill(ThemeColors.accent(theme))
-                                .frame(width: 22, height: 22)
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(
-                                            DesignTokens.ink.opacity(
-                                                model.database.settings.appearance.theme == theme ? 0.65 : 0.1
-                                            ),
-                                            lineWidth: model.database.settings.appearance.theme == theme ? 2 : 1
-                                        )
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .help(theme.title)
+
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
+                    ForEach(AppTheme.allCases.filter { $0 != .custom }) { theme in
+                        themePresetButton(theme)
                     }
                 }
+
+                if !model.database.settings.appearance.customThemes.isEmpty {
+                    Text("Custom themes")
+                        .font(Typography.caption(11))
+                        .foregroundStyle(DesignTokens.inkTertiary)
+                        .padding(.top, DesignTokens.s1)
+                    ForEach(model.database.settings.appearance.customThemes) { custom in
+                        customThemeRow(custom)
+                    }
+                }
+
+                Button {
+                    isShowingThemeEditor = true
+                } label: {
+                    Label("Create custom theme…", systemImage: "plus")
+                }
+                .buttonStyle(EditorialSecondaryButtonStyle())
+                .padding(.top, DesignTokens.s1)
             }
             .padding(.vertical, 7)
             EditorialToggleRow(title: "Dark mode while running", isOn: model.binding(\.appearance.darkModeWhenRunning))
@@ -204,6 +215,68 @@ struct SettingsView: View {
             }
             EditorialToggleRow(title: "Show timer in the menu bar", isOn: model.binding(\.appearance.showTimerInMenuBar))
         }
+    }
+
+    private func themePresetButton(_ theme: AppTheme) -> some View {
+        let selected = model.database.settings.appearance.theme == theme
+            && model.database.settings.appearance.selectedCustomThemeID == nil
+        return Button {
+            model.updateSettings {
+                $0.appearance.theme = theme
+                $0.appearance.selectedCustomThemeID = nil
+            }
+        } label: {
+            VStack(spacing: 6) {
+                HStack(spacing: 3) {
+                    ForEach([theme.lightPalette.accent, theme.lightPalette.canvas, theme.lightPalette.ink], id: \.self) { hex in
+                        Circle().fill(Color(hex: hex)).frame(width: 14, height: 14)
+                    }
+                }
+                Text(theme.title)
+                    .font(Typography.caption(11))
+                    .foregroundStyle(DesignTokens.ink)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                    .fill(selected ? DesignTokens.surfaceMuted : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.r2, style: .continuous)
+                    .strokeBorder(selected ? DesignTokens.ink.opacity(0.5) : DesignTokens.hairline, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func customThemeRow(_ custom: CustomTheme) -> some View {
+        let selected = model.database.settings.appearance.theme == .custom
+            && model.database.settings.appearance.selectedCustomThemeID == custom.id
+        return Button {
+            model.updateSettings {
+                $0.appearance.theme = .custom
+                $0.appearance.selectedCustomThemeID = custom.id
+            }
+        } label: {
+            HStack {
+                HStack(spacing: 3) {
+                    Circle().fill(Color(hex: custom.light.accent)).frame(width: 14, height: 14)
+                    Circle().fill(Color(hex: custom.light.canvas)).frame(width: 14, height: 14)
+                }
+                Text(custom.name)
+                    .font(Typography.body(13))
+                    .foregroundStyle(DesignTokens.ink)
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(DesignTokens.ink)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Notifications
