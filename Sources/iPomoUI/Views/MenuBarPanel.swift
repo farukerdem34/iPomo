@@ -4,6 +4,7 @@ import SwiftUI
 
 struct MenuBarPanel: View {
     @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var themeManager: ThemeManager
     @Environment(\.openWindow) private var openWindow
     @Environment(\.editorialAccent) private var accent
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -107,6 +108,7 @@ struct MenuBarPanel: View {
         .frame(width: 306)
         .background(DesignTokens.canvas)
         .animation(Motion.calm(reduceMotion, duration: 0.3), value: model.stage)
+        .iPomoThemeSync(model: model, themeManager: themeManager)
     }
 }
 

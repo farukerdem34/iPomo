@@ -15,6 +15,17 @@ extension NSColor {
     }
 }
 
+
+extension NSColor {
+    convenience init(hexString: String) {
+        let cleaned = hexString.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "#", with: "")
+        var value: UInt64 = 0
+        Scanner(string: cleaned).scanHexInt64(&value)
+        self.init(hex: UInt32(value))
+    }
+}
+
 extension Color {
     static func dynamic(light: UInt32, dark: UInt32) -> Color {
         Color(nsColor: NSColor(name: nil) { appearance in
@@ -36,24 +47,31 @@ extension Color {
 }
 
 enum DesignTokens {
-    // Surfaces and inks are resolved from the active theme palette.
-    static var canvas: Color { Color(hex: ThemeManager.shared.currentPalette().canvas) }
-    static var sidebar: Color { Color(hex: ThemeManager.shared.currentPalette().sidebar) }
-    static var surface: Color { Color(hex: ThemeManager.shared.currentPalette().surface) }
-    static var surfaceMuted: Color { Color(hex: ThemeManager.shared.currentPalette().surfaceMuted) }
-    static var ink: Color { Color(hex: ThemeManager.shared.currentPalette().ink) }
-    static var inkSecondary: Color { Color(hex: ThemeManager.shared.currentPalette().inkSecondary) }
-    static var inkTertiary: Color { Color(hex: ThemeManager.shared.currentPalette().inkTertiary) }
-    static var hairline: Color { Color(hex: ThemeManager.shared.currentPalette().hairline) }
+    // Surfaces and inks are resolved from the active theme palette. Colors are
+    // dynamic so they follow system dark/light changes at draw time.
+    static var canvas: Color { Self.dynamicColor { $0.canvas } }
+    static var sidebar: Color { Self.dynamicColor { $0.sidebar } }
+    static var surface: Color { Self.dynamicColor { $0.surface } }
+    static var surfaceMuted: Color { Self.dynamicColor { $0.surfaceMuted } }
+    static var ink: Color { Self.dynamicColor { $0.ink } }
+    static var inkSecondary: Color { Self.dynamicColor { $0.inkSecondary } }
+    static var inkTertiary: Color { Self.dynamicColor { $0.inkTertiary } }
+    static var hairline: Color { Self.dynamicColor { $0.hairline } }
 
-    static var accent: Color { Color(hex: ThemeManager.shared.currentPalette().accent) }
-    static var onAccent: Color { Color(hex: ThemeManager.shared.currentPalette().onAccent) }
-    static var switchKnob: Color { Color(hex: ThemeManager.shared.currentPalette().switchKnob) }
-    static var sage: Color { Color(hex: ThemeManager.shared.currentPalette().sage) }
-    static var slate: Color { Color(hex: ThemeManager.shared.currentPalette().slate) }
-    static var success: Color { Color(hex: ThemeManager.shared.currentPalette().success) }
-    static var warning: Color { Color(hex: ThemeManager.shared.currentPalette().warning) }
-    static var danger: Color { Color(hex: ThemeManager.shared.currentPalette().danger) }
+    static var accent: Color { Self.dynamicColor { $0.accent } }
+    static var onAccent: Color { Self.dynamicColor { $0.onAccent } }
+    static var switchKnob: Color { Self.dynamicColor { $0.switchKnob } }
+    static var sage: Color { Self.dynamicColor { $0.sage } }
+    static var slate: Color { Self.dynamicColor { $0.slate } }
+    static var success: Color { Self.dynamicColor { $0.success } }
+    static var warning: Color { Self.dynamicColor { $0.warning } }
+    static var danger: Color { Self.dynamicColor { $0.danger } }
+
+    private static func dynamicColor(_ key: @escaping (ThemePalette) -> String) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            NSColor(hexString: key(ThemeManager.shared.palette(for: appearance)))
+        })
+    }
 
     // 8pt grid
     static let s1: CGFloat = 4

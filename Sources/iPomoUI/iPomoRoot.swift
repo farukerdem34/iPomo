@@ -57,6 +57,7 @@ public struct iPomoRoot: App {
             MenuBarPanel()
                 .environmentObject(model)
                 .environmentObject(themeManager)
+                .iPomoThemeSync(model: model, themeManager: themeManager)
                 .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
         } label: {
             MenuBarLabel()
@@ -68,13 +69,14 @@ public struct iPomoRoot: App {
             SettingsView()
                 .environmentObject(model)
                 .environmentObject(themeManager)
+                .iPomoThemeSync(model: model, themeManager: themeManager)
                 .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
         }
     }
 }
 
 @MainActor
-private func resolvedAccent(model: AppModel, themeManager: ThemeManager) -> Color {
+func resolvedAccent(model: AppModel, themeManager: ThemeManager) -> Color {
     let appearance = model.database.settings.appearance
     if appearance.theme == .custom,
        let id = appearance.selectedCustomThemeID,
@@ -82,6 +84,33 @@ private func resolvedAccent(model: AppModel, themeManager: ThemeManager) -> Colo
         return ThemeColors.accent(custom: custom, isDark: NSApp?.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua)
     }
     return ThemeColors.accent(appearance.theme)
+}
+
+
+@MainActor
+private func configureThemeManager(model: AppModel, themeManager: ThemeManager) {
+    let appearance = model.database.settings.appearance
+    themeManager.configure(
+        theme: appearance.theme,
+        customThemes: appearance.customThemes,
+        selectedCustomThemeID: appearance.selectedCustomThemeID
+    )
+}
+
+extension View {
+    func iPomoThemeSync(model: AppModel, themeManager: ThemeManager) -> some View {
+        self
+            .onAppear { configureThemeManager(model: model, themeManager: themeManager) }
+            .onChange(of: model.database.settings.appearance.theme) { _, _ in
+                configureThemeManager(model: model, themeManager: themeManager)
+            }
+            .onChange(of: model.database.settings.appearance.customThemes) { _, _ in
+                configureThemeManager(model: model, themeManager: themeManager)
+            }
+            .onChange(of: model.database.settings.appearance.selectedCustomThemeID) { _, _ in
+                configureThemeManager(model: model, themeManager: themeManager)
+            }
+    }
 }
 
 private struct MenuBarLabel: View {

@@ -125,6 +125,9 @@ public struct AppDatabase: Codable, Sendable {
         }
         timer.focusRoundCount = min(Self.maximumFocusRounds, max(0, timer.focusRoundCount))
         timer.accumulatedSeconds = min(Double(Self.maximumRecordedSeconds), max(0, timer.accumulatedSeconds))
+    if timer.isRunning && timer.startedAt == nil {
+        timer.isRunning = false
+    }
     }
 
     public var totalFocusSeconds: Int {

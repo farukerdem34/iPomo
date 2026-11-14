@@ -41,6 +41,7 @@ struct SettingsView: View {
             .editorialPagePadding()
         }
         .editorialBackground()
+        .iPomoThemeSync(model: model, themeManager: themeManager)
         .sheet(isPresented: $isShowingThemeEditor) {
             ThemeEditorSheet { theme in
                 model.updateSettings { settings in

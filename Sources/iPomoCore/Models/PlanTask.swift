@@ -69,10 +69,7 @@ public struct PlanTask: Identifiable, Codable, Hashable, Sendable {
         guard !isCompleted, estimatedPomodoros > 0 else { return false }
         return completedPomodoros + 0.0001 >= estimatedPomodoros
     }
-    public var reachedEstimate: Bool { hasReachedEstimate }
-    public var estimateReached: Bool { hasReachedEstimate }
-    public var isEstimateReached: Bool { hasReachedEstimate }
-    public var hasMetEstimate: Bool { hasReachedEstimate }
+
 
     public var displayProgress: String {
         let done = Self.numberString(completedPomodoros)

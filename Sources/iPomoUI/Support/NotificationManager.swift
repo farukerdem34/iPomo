@@ -161,7 +161,7 @@ final class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
     /// name on success, or `nil` when the file cannot be used.
     func importCustomSound(from url: URL) -> String? {
         let ext = url.pathExtension.lowercased()
-        guard ["aiff", "aif", "wav", "caf", "mp3", "m4a"].contains(ext) else { return nil }
+        guard ["aiff", "aif", "wav", "caf"].contains(ext) else { return nil }
         guard let audioFile = try? AVAudioFile(forReading: url) else { return nil }
         let duration = Double(audioFile.length) / audioFile.processingFormat.sampleRate
         guard duration > 0, duration <= 30 else { return nil }

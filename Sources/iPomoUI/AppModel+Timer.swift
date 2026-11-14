@@ -135,9 +135,6 @@ extension AppModel {
         lastCycleResetAt = now
     }
 
-    func autoResetCycleIfNeeded(now: Date = Date()) { resetCycleIfNeeded(now: now) }
-    func resetCycleIfExpired(now: Date = Date()) { resetCycleIfNeeded(now: now) }
-    func checkCycleReset(now: Date = Date()) { resetCycleIfNeeded(now: now) }
 
     func skipStage() {
         cancelAutoStart()
@@ -301,7 +298,7 @@ extension AppModel {
                 scheduleAutoStart(nextStage: next)
             }
         }
-        self.now = Date()
+        self.now = now
         persistNow()
     }
 
@@ -412,17 +409,17 @@ extension AppModel {
     /// Called when the user deliberately abandons the round (reset, stage
     /// switch, task switch) so tracked focus time is not lost. Skipping is a
     /// completion shortcut and goes through `finishCurrentRound` instead.
-    func recordCurrentPartialIfNeeded() {
+    func recordCurrentPartialIfNeeded(now: Date = Date()) {
         guard database.settings.behavior.recordPartialSessions else { return }
         guard database.timer.stage == .focus else { return }
-        let consumed = TimerMath.consumedSeconds(snapshot: database.timer, now: Date())
+        let consumed = TimerMath.consumedSeconds(snapshot: database.timer, now: now)
         guard consumed >= 1 else { return }
         let duration = TimerMath.durationSeconds(
             stage: .focus,
             settings: database.settings.timer,
             task: activeTask
         )
-        let endedAt = Date()
+        let endedAt = now
         let session = makeSession(
             task: activeTask,
             stage: .focus,
