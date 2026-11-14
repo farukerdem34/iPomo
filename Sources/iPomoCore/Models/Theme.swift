@@ -5,6 +5,10 @@ import Foundation
 /// A full color palette for one appearance (light or dark) of a theme.
 /// Stored as hex strings so themes are Codable, Sendable, and portable.
 public struct ThemePalette: Codable, Sendable, Equatable, Hashable {
+    private enum CodingKeys: String, CodingKey {
+        case canvas, sidebar, surface, surfaceMuted, ink, inkSecondary, inkTertiary
+        case hairline, accent, onAccent, switchKnob, sage, slate, success, warning, danger
+    }
     public var canvas: String
     public var sidebar: String
     public var surface: String
@@ -56,6 +60,26 @@ public struct ThemePalette: Codable, Sendable, Equatable, Hashable {
         self.success = success
         self.warning = warning
         self.danger = danger
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.canvas = try c.decodeIfPresent(String.self, forKey: .canvas) ?? "#F5F0E7"
+        self.sidebar = try c.decodeIfPresent(String.self, forKey: .sidebar) ?? "#EFE8DC"
+        self.surface = try c.decodeIfPresent(String.self, forKey: .surface) ?? "#FBF7F0"
+        self.surfaceMuted = try c.decodeIfPresent(String.self, forKey: .surfaceMuted) ?? "#ECE4D7"
+        self.ink = try c.decodeIfPresent(String.self, forKey: .ink) ?? "#211C17"
+        self.inkSecondary = try c.decodeIfPresent(String.self, forKey: .inkSecondary) ?? "#6D6458"
+        self.inkTertiary = try c.decodeIfPresent(String.self, forKey: .inkTertiary) ?? "#9B8F7F"
+        self.hairline = try c.decodeIfPresent(String.self, forKey: .hairline) ?? "#DCD2C3"
+        self.accent = try c.decodeIfPresent(String.self, forKey: .accent) ?? "#B85C43"
+        self.onAccent = try c.decodeIfPresent(String.self, forKey: .onAccent) ?? "#FFF9F2"
+        self.switchKnob = try c.decodeIfPresent(String.self, forKey: .switchKnob) ?? "#FFFDF8"
+        self.sage = try c.decodeIfPresent(String.self, forKey: .sage) ?? "#6E7F5E"
+        self.slate = try c.decodeIfPresent(String.self, forKey: .slate) ?? "#596A78"
+        self.success = try c.decodeIfPresent(String.self, forKey: .success) ?? "#5F7A50"
+        self.warning = try c.decodeIfPresent(String.self, forKey: .warning) ?? "#A9762F"
+        self.danger = try c.decodeIfPresent(String.self, forKey: .danger) ?? "#A8433A"
     }
 
     // MARK: Built-in palettes
@@ -175,16 +199,41 @@ public struct ThemePalette: Codable, Sendable, Equatable, Hashable {
 
 // MARK: - Custom theme
 
+extension CustomTheme {
+    public static var sampleJSON: String {
+        let theme = CustomTheme(name: "Sample Theme", light: .catppuccinLight, dark: .catppuccinDark)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        guard let data = try? encoder.encode(theme),
+              let text = String(data: data, encoding: .utf8) else {
+            return "{}"
+        }
+        return text
+    }
+}
+
 public struct CustomTheme: Codable, Sendable, Equatable, Identifiable {
     public var id: UUID
     public var name: String
     public var light: ThemePalette
     public var dark: ThemePalette
 
+    private enum CodingKeys: String, CodingKey {
+        case id, name, light, dark
+    }
+
     public init(id: UUID = UUID(), name: String, light: ThemePalette, dark: ThemePalette) {
         self.id = id
         self.name = name
         self.light = light
         self.dark = dark
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try c.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        self.name = try c.decodeIfPresent(String.self, forKey: .name) ?? "Imported Theme"
+        self.light = try c.decodeIfPresent(ThemePalette.self, forKey: .light) ?? .warmEditorialLight
+        self.dark = try c.decodeIfPresent(ThemePalette.self, forKey: .dark) ?? .warmEditorialDark
     }
 }

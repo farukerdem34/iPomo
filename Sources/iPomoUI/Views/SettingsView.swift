@@ -9,6 +9,7 @@ struct SettingsView: View {
     var embedded: Bool = false
     @State private var showResetConfirm = false
     @State private var isShowingThemeEditor = false
+    @State private var isShowingThemeImport = false
 
     private var importPresented: Binding<Bool> {
         Binding(
@@ -48,6 +49,9 @@ struct SettingsView: View {
                     settings.appearance.selectedCustomThemeID = theme.id
                 }
             }
+        }
+        .sheet(isPresented: $isShowingThemeImport) {
+            ThemeJSONImportSheet()
         }
         .navigationTitle("Settings")
         .frame(
@@ -203,6 +207,14 @@ struct SettingsView: View {
                     isShowingThemeEditor = true
                 } label: {
                     Label("Create custom theme…", systemImage: "plus")
+                }
+                .buttonStyle(EditorialSecondaryButtonStyle())
+                .padding(.top, DesignTokens.s1)
+
+                Button {
+                    isShowingThemeImport = true
+                } label: {
+                    Label("Import theme from JSON…", systemImage: "doc.badge.plus")
                 }
                 .buttonStyle(EditorialSecondaryButtonStyle())
                 .padding(.top, DesignTokens.s1)
