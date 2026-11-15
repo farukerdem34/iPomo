@@ -233,4 +233,18 @@ struct AppModelTests {
         #expect(model.database.timer.stage == .shortBreak)
         #expect(model.database.timer.isRunning == false)
     }
+
+    @Test func reportSessionsPaginatesFivePerPage() throws {
+        let (model, directory) = try makeModel()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        for i in 0..<7 {
+            model.addManualSession(taskTitle: "Task \(i)", projectID: nil, date: Date().addingTimeInterval(Double(i) * 3600), minutes: 25)
+        }
+        let first = model.reportSessions(page: 0)
+        let second = model.reportSessions(page: 1)
+        #expect(first.count == 5)
+        #expect(second.count == 2)
+        #expect(model.reportSessions(page: 99).count == 2)
+        #expect(model.reportSessions(page: 0, pageSize: 0).count == 1)
+    }
 }

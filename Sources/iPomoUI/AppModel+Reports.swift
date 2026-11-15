@@ -23,7 +23,8 @@ extension AppModel {
         reportSummary()
     }
 
-    func reportSessions(page: Int = 0, pageSize: Int = 15) -> [FocusSession] {
+    func reportSessions(page: Int = 0, pageSize: Int = 5) -> [FocusSession] {
+        let pageSize = max(1, pageSize)
         let summary = reportSummary()
         let sessions = summary.sessions
         let count = max(1, (sessions.count + pageSize - 1) / pageSize)

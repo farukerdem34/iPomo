@@ -9,7 +9,7 @@ struct ReportsView: View {
     @State private var showManualEntry = false
     @State private var sessionToDelete: FocusSession?
     @State private var sessionPage = 0
-    private let sessionPageSize = 15
+    private let sessionPageSize = 5
 
     var body: some View {
         let summary = model.currentReportSummary
@@ -32,6 +32,10 @@ struct ReportsView: View {
         .navigationTitle("Reports")
         .onChange(of: model.reportRange) { _, _ in sessionPage = 0 }
         .onChange(of: model.reportProjectFilter) { _, _ in sessionPage = 0 }
+        .onChange(of: model.currentReportSummary.sessions.count) { _, count in
+            let pages = max(1, (count + sessionPageSize - 1) / sessionPageSize)
+            if sessionPage > pages - 1 { sessionPage = max(0, pages - 1) }
+        }
         .sheet(isPresented: $showManualEntry) {
             ManualSessionSheet()
                 .environmentObject(model)
@@ -263,15 +267,6 @@ struct ReportsView: View {
         }
     }
 
-    private func paginatedSessions(_ summary: ReportSummary) -> [FocusSession] {
-        let sessions = summary.sessions
-        let count = sessionPageCount(summary)
-        let page = min(max(0, sessionPage), max(0, count - 1))
-        let start = page * sessionPageSize
-        guard start < sessions.count else { return [] }
-        return Array(sessions.dropFirst(start).prefix(sessionPageSize))
-    }
-
     private func sessionPageCount(_ summary: ReportSummary) -> Int {
         max(1, (summary.sessions.count + sessionPageSize - 1) / sessionPageSize)
     }
@@ -304,7 +299,7 @@ struct ReportsView: View {
                 .foregroundStyle(DesignTokens.inkTertiary)
                 .padding(.vertical, 4)
                 Hairline()
-                ForEach(paginatedSessions(summary)) { session in
+                ForEach(model.reportSessions(page: sessionPage, pageSize: sessionPageSize)) { session in
                     SessionRow(session: session, onDelete: { sessionToDelete = session })
                     Hairline()
                 }
@@ -315,7 +310,7 @@ struct ReportsView: View {
                         }
                         .buttonStyle(EditorialQuietButtonStyle())
                         .disabled(sessionPage == 0)
-                        Text("Page \\(sessionPage + 1) of \\(sessionPageCount(summary))")
+                        Text("Page \(min(max(0, sessionPage), max(0, sessionPageCount(summary) - 1)) + 1) of \(sessionPageCount(summary))")
                             .font(Typography.caption(11))
                             .foregroundStyle(DesignTokens.inkTertiary)
                         Button("Next") {
