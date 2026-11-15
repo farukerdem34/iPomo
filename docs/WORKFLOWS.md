@@ -91,7 +91,7 @@ Every user-facing workflow, in the order a new user is likely to encounter it.
 ### Choose a task
 
 1. Open **Timer**.
-2. Open the task menu above the timer and pick an active task, or **No task**.
+2. Open the task menu above the timer and pick an active task, or **No task**. Use **Add task** (or **New task…** in the menu) to create a task without leaving the Timer page.
 3. If the timer is running and **Confirm when switching tasks mid-round** is on, confirm the switch. The current round resets for the new task; partial time is recorded if enabled.
 
 ### Run a round

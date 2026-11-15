@@ -35,6 +35,12 @@ struct TimerView: View {
                 detail: "\(model.roundLabel) · \(model.longBreakIntervalLabel.lowercased())"
             )
             Spacer()
+            Button {
+                model.presentNewTask()
+            } label: {
+                Label("Add task", systemImage: "plus")
+            }
+            .buttonStyle(EditorialQuietButtonStyle())
             Button("Reset cycle") { model.resetCycle() }
                 .buttonStyle(EditorialQuietButtonStyle())
         }
@@ -135,6 +141,12 @@ struct TimerView: View {
                         Text(task.title)
                     }
                 }
+            }
+            Divider()
+            Button {
+                model.presentNewTask()
+            } label: {
+                Label("New task…", systemImage: "plus")
             }
         } label: {
             VStack(alignment: .leading, spacing: 5) {
