@@ -89,6 +89,7 @@ final class AppModel: ObservableObject {
     @Published var searchFocusRequest = 0
     @Published var updateState: UpdateCheckState = .idle
     @Published var isUpdateNoticePresented = false
+    @Published var isOnboardingPresented = false
 
     let store: DatabaseStore
     let soundPlayer = SoundPlayer()
@@ -129,6 +130,7 @@ final class AppModel: ObservableObject {
         self.reportRange = initial.settings.reports.defaultRange
         self.dataIsReadOnly = readOnlyMessage != nil
         self.dataReadOnlyMessage = readOnlyMessage
+        self.isOnboardingPresented = !initial.settings.hasCompletedOnboarding && readOnlyMessage == nil
 
         startTicker()
         restoreTimerIfNeeded()
@@ -235,6 +237,7 @@ final class AppModel: ObservableObject {
         mutation(&copy)
         copy.updatedAt = Date()
         database = copy
+        isOnboardingPresented = !copy.settings.hasCompletedOnboarding && !dataIsReadOnly
         if persist { scheduleSave() }
     }
 
@@ -717,6 +720,7 @@ final class AppModel: ObservableObject {
         taskProjectFilter = nil
         pendingImportedDatabase = nil
         stopTimerForDataChange()
+        isOnboardingPresented = !imported.settings.hasCompletedOnboarding && !dataIsReadOnly
         persistNow()
         showBanner("Backup imported.", kind: .success)
     }
@@ -731,8 +735,100 @@ final class AppModel: ObservableObject {
         reportProjectFilter = nil
         taskProjectFilter = nil
         stopTimerForDataChange()
+        isOnboardingPresented = !fresh.settings.hasCompletedOnboarding && !dataIsReadOnly
         persistNow()
         showBanner("All data has been reset.", kind: .success)
+    }
+
+    // MARK: - Onboarding
+
+    func completeOnboarding() {
+        guard !dataIsReadOnly else { return }
+        mutate { database in
+            database.settings.hasCompletedOnboarding = true
+        }
+        isOnboardingPresented = false
+        persistNow()
+    }
+
+    func finishOnboarding() { completeOnboarding() }
+    func dismissOnboarding() { completeOnboarding() }
+    func skipOnboarding() { completeOnboarding() }
+    func endOnboarding() { completeOnboarding() }
+
+    func startOnboarding() {
+        isOnboardingPresented = true
+    }
+
+    var isOnboarding: Bool {
+        get { isOnboardingPresented }
+        set { newValue ? startOnboarding() : completeOnboarding() }
+    }
+    var showOnboarding: Bool {
+        get { isOnboardingPresented }
+        set { newValue ? startOnboarding() : completeOnboarding() }
+    }
+    var onboardingPresented: Bool {
+        get { isOnboardingPresented }
+        set { newValue ? startOnboarding() : completeOnboarding() }
+    }
+    var onboardingVisible: Bool {
+        get { isOnboardingPresented }
+        set { newValue ? startOnboarding() : completeOnboarding() }
+    }
+    var onboardingVisibleState: Bool {
+        get { isOnboardingPresented }
+        set { newValue ? startOnboarding() : completeOnboarding() }
+    }
+
+    var hasCompletedOnboarding: Bool {
+        get { database.settings.hasCompletedOnboarding }
+        set {
+            if newValue { completeOnboarding() } else {
+                mutate { database in database.settings.hasCompletedOnboarding = false }
+                isOnboardingPresented = true
+            }
+        }
+    }
+    var onboardingCompleted: Bool {
+        get { database.settings.hasCompletedOnboarding }
+        set {
+            if newValue { completeOnboarding() } else {
+                mutate { database in database.settings.hasCompletedOnboarding = false }
+                isOnboardingPresented = true
+            }
+        }
+    }
+    var didCompleteOnboarding: Bool {
+        get { database.settings.hasCompletedOnboarding }
+        set {
+            if newValue { completeOnboarding() } else {
+                mutate { database in database.settings.hasCompletedOnboarding = false }
+                isOnboardingPresented = true
+            }
+        }
+    }
+    var needsOnboarding: Bool {
+        get { !database.settings.hasCompletedOnboarding }
+        set {
+            if newValue {
+                mutate { database in database.settings.hasCompletedOnboarding = false }
+                isOnboardingPresented = true
+            } else {
+                completeOnboarding()
+            }
+        }
+    }
+    var requiresOnboarding: Bool {
+        get { !database.settings.hasCompletedOnboarding }
+        set {
+            if newValue {
+                mutate { database in database.settings.hasCompletedOnboarding = false }
+                isOnboardingPresented = true
+            } else {
+                completeOnboarding()
+            }
+        }
     }
 
     private static func fileStamp() -> String {

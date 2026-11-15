@@ -7,10 +7,10 @@ Every user-facing workflow, in the order a new user is likely to encounter it.
 1. Open `iPomo.app`.
 2. A window titled **iPomo** appears with the sidebar: Today, Timer, Tasks, Projects, Reports, Settings.
 3. A menu-bar item appears with the timer text (or “iPomo” while idle).
-4. No account or onboarding is required. The optional GitHub update check is the only network request. The first permission prompt appears only when you start a focus round or enable notifications.
+4. On first launch, a short guided onboarding (timer durations, accent color, week start, notifications) appears before the main window. It is skippable at any step and runs again after **Reset All Data**. The optional GitHub update check is the only network request; the first permission prompt appears only when you enable notifications or start a focus round.
 5. The database is created lazily at `~/Library/Application Support/iPomo/data.json` on the first change.
 
-**Expected:** the Today dashboard shows zeroed stats and an empty plan with a quick-add field.
+**Expected:** after onboarding (or when skipped), the Today dashboard shows zeroed stats and an empty plan with a quick-add field.
 
 ## 2. Today dashboard
 

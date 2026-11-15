@@ -134,3 +134,19 @@ public struct AppDatabase: Codable, Sendable {
         sessions.filter(\.isFocus).reduce(0) { $0 + max(0, $1.actualSeconds) }
     }
 }
+
+extension AppDatabase {
+    public var hasCompletedOnboarding: Bool {
+        get { settings.hasCompletedOnboarding }
+        set { settings.hasCompletedOnboarding = newValue }
+    }
+
+    public var onboardingCompleted: Bool {
+        get { settings.onboardingCompleted }
+        set { settings.onboardingCompleted = newValue }
+    }
+
+    public var needsOnboarding: Bool {
+        settings.needsOnboarding
+    }
+}

@@ -9,6 +9,14 @@ struct RootView: View {
 
     var body: some View {
         let _ = themeManager.revision
+        Group {
+        if model.isOnboardingPresented {
+            OnboardingView()
+                .environmentObject(model)
+                .environmentObject(themeManager)
+                .environment(\.editorialAccent, resolvedAccent(model: model, themeManager: themeManager))
+                .tint(resolvedAccent(model: model, themeManager: themeManager))
+        } else {
         NavigationSplitView {
             SidebarView()
                 .navigationSplitViewColumnWidth(min: 220, ideal: DesignTokens.sidebarWidth, max: 264)
@@ -25,6 +33,8 @@ struct RootView: View {
         .frame(minWidth: 1_080, minHeight: 680)
         .background(DesignTokens.canvas)
         .preferredColorScheme(preferredScheme)
+        }
+        }
         .sheet(item: $model.pendingTaskEditor) { request in
             TaskEditorView(request: request)
                 .environmentObject(model)

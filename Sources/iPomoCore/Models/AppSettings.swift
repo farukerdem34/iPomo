@@ -273,6 +273,25 @@ public struct PlanningSettings: Codable, Sendable, Equatable {
     }
 }
 
+
+// MARK: - Onboarding
+
+public struct OnboardingSettings: Codable, Sendable, Equatable {
+    public var hasCompletedOnboarding: Bool
+
+    public init(hasCompletedOnboarding: Bool = false) {
+        self.hasCompletedOnboarding = hasCompletedOnboarding
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case hasCompletedOnboarding
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        hasCompletedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? true
+    }
+}
 // MARK: - Updates
 
 public struct UpdateSettings: Codable, Sendable, Equatable {
@@ -303,6 +322,7 @@ public struct AppSettings: Codable, Sendable, Equatable {
     public var reports: ReportSettings
     public var planning: PlanningSettings
     public var updates: UpdateSettings
+    public var onboarding: OnboardingSettings
 
     public init(
         timer: TimerSettings = TimerSettings(),
@@ -312,7 +332,8 @@ public struct AppSettings: Codable, Sendable, Equatable {
         notifications: NotificationSettings = NotificationSettings(),
         reports: ReportSettings = ReportSettings(),
         planning: PlanningSettings = PlanningSettings(),
-        updates: UpdateSettings = UpdateSettings()
+        updates: UpdateSettings = UpdateSettings(),
+        onboarding: OnboardingSettings = OnboardingSettings()
     ) {
         self.timer = timer
         self.behavior = behavior
@@ -322,10 +343,11 @@ public struct AppSettings: Codable, Sendable, Equatable {
         self.reports = reports
         self.planning = planning
         self.updates = updates
+        self.onboarding = onboarding
     }
 
     private enum CodingKeys: String, CodingKey {
-        case timer, behavior, sound, appearance, notifications, reports, planning, updates
+        case timer, behavior, sound, appearance, notifications, reports, planning, updates, onboarding
     }
 
     public init(from decoder: Decoder) throws {
@@ -338,5 +360,22 @@ public struct AppSettings: Codable, Sendable, Equatable {
         reports = try c.decodeIfPresent(ReportSettings.self, forKey: .reports) ?? ReportSettings()
         planning = try c.decodeIfPresent(PlanningSettings.self, forKey: .planning) ?? PlanningSettings()
         updates = try c.decodeIfPresent(UpdateSettings.self, forKey: .updates) ?? UpdateSettings()
+        onboarding = try c.decodeIfPresent(OnboardingSettings.self, forKey: .onboarding) ?? OnboardingSettings(hasCompletedOnboarding: true)
+    }
+}
+
+extension AppSettings {
+    public var hasCompletedOnboarding: Bool {
+        get { onboarding.hasCompletedOnboarding }
+        set { onboarding.hasCompletedOnboarding = newValue }
+    }
+
+    public var onboardingCompleted: Bool {
+        get { onboarding.hasCompletedOnboarding }
+        set { onboarding.hasCompletedOnboarding = newValue }
+    }
+
+    public var needsOnboarding: Bool {
+        !onboarding.hasCompletedOnboarding
     }
 }
